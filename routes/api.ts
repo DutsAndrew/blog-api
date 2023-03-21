@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction} from 'express';
-const router = express.Router();
+const router = express.Router(),
+      appController = require('../controllers/appController');
 
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
   res.json({
@@ -7,6 +8,6 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-
+router.post('/login', appController.post_login);
 
 module.exports = router;

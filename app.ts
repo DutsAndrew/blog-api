@@ -3,12 +3,28 @@ import express, { Express, Request, Response, NextFunction} from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 
 const apiRouter = require('./routes/api'),
       appRouter = require('./routes/app');
 
 dotenv.config();
 const app = express();
+
+// database link in
+mongoose.set('strictQuery', false);
+const mongoDB = process.env.DEVMONGODB;
+(async function main() {
+  try {
+    await mongoose.connect((mongoDB as string));
+    const db = mongoose.connection;
+    db.on('error', console.error.bind(console, 'mongo connection error'));
+  } catch(err) {
+    console.error(err);
+  };
+})();
+
+// // // // // // // // // // // // // // // //
 
 app.use(logger('dev'));
 app.use(express.json());
