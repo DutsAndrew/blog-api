@@ -11,7 +11,7 @@ const UserSchema = new Schema({
     required: true,
   },
   img: {
-    type: Image,
+    type: String,
     required: false,
   },
   joined: {
@@ -26,11 +26,11 @@ const UserSchema = new Schema({
     type: String,
     required: false,
   },
-  role: {
+  password: {
     type: String,
     required: true,
   },
-  uid: {
+  role: {
     type: String,
     required: true,
   },

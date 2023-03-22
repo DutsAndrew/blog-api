@@ -8,6 +8,8 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
   });
 });
 
+router.post('/signup', appController.post_signup);
 router.post('/login', appController.post_login);
+router.post('/upload/profile/img', appController.post_upload_profile_img);
 
 module.exports = router;
