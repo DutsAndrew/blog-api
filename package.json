@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/DutsAndrew/blog-api/issues"
   },
-  "homepage": "https://github.com/DutsAndrew/blog-api#readme",
+  "homepage": "https://github.com/DutsAndrew/blog-api",
   "dependencies": {
     "async": "^3.2.4",
     "bcryptjs": "^2.4.3",
