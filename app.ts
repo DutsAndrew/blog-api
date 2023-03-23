@@ -1,12 +1,14 @@
 import createError from 'http-errors';
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import passport from 'passport';
 
 const apiRouter = require('./routes/api'),
-      appRouter = require('./routes/app');
+      appRouter = require('./routes/app'),
+      JwtStrategy = require('./scripts/jwt');
 
 dotenv.config();
 const app = express();
@@ -26,6 +28,7 @@ const mongoDB = process.env.DEVMONGODB;
 
 // // // // // // // // // // // // // // // //
 
+passport.use(JwtStrategy);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
