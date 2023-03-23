@@ -1,10 +1,10 @@
 import async from 'async';
 import { Request, Response, NextFunction } from 'express';
 import { check, body, validationResult } from 'express-validator';
-import multer from 'multer';
 import bcrypt from 'bcryptjs';
 import { DateTime } from 'luxon';
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
+import multer from 'multer';
 const User = require("../models/user");
 
 exports.post_signup = [
@@ -125,5 +125,7 @@ exports.post_login = [
 ];
 
 exports.post_upload_profile_img = async (req: Request, res: Response, next: NextFunction) => {
-
+  res.json({
+    message: "Not implemented yet",
+  });
 };
