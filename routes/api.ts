@@ -2,9 +2,9 @@ import express, { Request, Response, NextFunction} from 'express';
 import passport from 'passport';
 const router = express.Router(),
       appController = require('../controllers/appController'),
-      commentController = require('../models/comment'),
-      postController = require('../models/post'),
-      userController = require('../models/user');
+      commentController = require('../controllers/commentController'),
+      postController = require('../controllers/postController'),
+      userController = require('../controllers/userController');
 
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
   res.json({
@@ -14,7 +14,7 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
 
 router.post('/signup', appController.post_signup);
 router.post('/login', appController.post_login);
-router.post('/upload/profile/img', appController.post_upload_profile_img);
+router.post('/upload/profile/img', passport.authenticate('jwt', { session: false }), appController.post_upload_profile_img);
 
 router.get('/posts', passport.authenticate('jwt', { session: false }), postController.get_posts);
 router.get('/users', passport.authenticate('jwt', { session: false }), userController.get_users);

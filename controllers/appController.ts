@@ -124,8 +124,10 @@ exports.post_login = [
   },
 ];
 
-exports.post_upload_profile_img = async (req: Request, res: Response, next: NextFunction) => {
-  res.json({
-    message: "Not implemented yet",
-  });
-};
+exports.post_upload_profile_img = [
+  (req: Request, res: Response, next: NextFunction) => {
+    res.json({
+      message: "Not implemented",
+    });
+  },
+];
