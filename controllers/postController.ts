@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { check, body, validationResult } from 'express-validator';
-import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import { AuthRequest } from '../Types/interfaces';
+import { DateTime } from 'luxon';
 const Post = require("../models/post");
+dotenv.config();
 
 exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
   res.json({
@@ -10,7 +13,6 @@ exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
 };
 
 exports.create_post = [
-
   // Convert the tags to an array.
   (req: Request, res: Response, next: NextFunction) => {
     if (!Array.isArray(req.body.tags)) {
@@ -31,12 +33,32 @@ exports.create_post = [
     .withMessage("The body of your post must meet our criteria of at least one character and no more than 10000")
     .escape(),
 
-  (req: Request, res: Response, next: NextFunction) => {
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      
+      res.json({
+        title: req.body.title,
+        body: req.body.body,
+        errors: errors,
+      });
     } else {
-      
+      const userId = req.user[0]["_id"];
+      const newPost = new Post({
+        author: userId,
+        body: req.body.body,
+        comments: [],
+        favorites: 0,
+        likes: 1,
+        tags: req.body.tags,
+        timestamp: DateTime.now(),
+        title: req.body.title,
+        whoLiked: [userId],
+      });
+      const uploadPost = await newPost.save();
+      res.json({
+        message: "upload success",
+        uploadPost,
+      });
     };
   },
 

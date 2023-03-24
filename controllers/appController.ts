@@ -67,60 +67,87 @@ exports.post_signup = [
 ];
 
 exports.post_login = [
-  body("email", "You must include an email to login")
-    .trim()
-    .isEmail()
-    .withMessage("Your email entry is not in an email format we accept (IE. hello@gmail.com")
-    .isLength({ min: 1, max: 1000 })
-    .escape(),
-  body("password", "You cannot login without a password entry")
-    .trim()
-    .isLength({ min: 1, max: 1000 })
-    .escape(),
+  // body("email", "You must include an email to login")
+  //   .trim()
+  //   .isEmail()
+  //   .withMessage("Your email entry is not in an email format we accept (IE. hello@gmail.com")
+  //   .isLength({ min: 1, max: 1000 })
+  //   .escape(),
+  // body("password", "You cannot login without a password entry")
+  //   .trim()
+  //   .isLength({ min: 1, max: 1000 })
+  //   .escape(),
 
   async (req: Request, res: Response, next: NextFunction) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      res.json({
-        errors,
-      });
-    } else {
-      const user = await User.find({ email: req.body.email });
+
+    const email = 'hello@gmail.com';
+
+    const user = await User.find({ email: email });
       if (!user) {
         // no user in db
         return res.json({
         message: "That email is not connected to an account"
         });
       };
-      // user found
-      bcrypt.compare(req.body.password, user.password, (err, validated) => {
-        if (err) return next(err);
-        if (validated) {
-          // passwords match
-          const options: SignOptions = {
-            expiresIn: 120,
-          };
-          const email = user.email;
-          const token = jwt.sign({ email }, (process.env.SECRET as Secret), options, (err, token) => {
-            if (err) {
-              return res.status(400).json({
-                message: "Error creating token",
-              });
-            } else {
-              return res.status(200).json({ 
-                message: "Auth Passed",
-                token,
-              });
-            };
+      const options: SignOptions = {
+        expiresIn: '1h',
+      };
+      const userEmail = user.email;
+      const token = jwt.sign({ userEmail }, (process.env.SECRET as Secret), options, (err, token) => {
+        if (err) {
+          return res.status(400).json({
+            message: "Error creating token",
           });
         } else {
-          // passwords did not match
-          res.json({
-            message: "Incorrect password",
+          return res.status(200).json({ 
+            message: "Auth Passed",
+            token,
           });
         };
       });
-    };
+
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   res.json({
+    //     errors,
+    //   });
+    // } else {
+    //   const user = await User.find({ email: req.body.email });
+    //   if (!user) {
+    //     // no user in db
+    //     return res.json({
+    //     message: "That email is not connected to an account"
+    //     });
+    //   };
+    //   // user found
+    //   bcrypt.compare(req.body.password, user.password, (err, validated) => {
+    //     if (err) return next(err);
+    //     if (validated) {
+    //       // passwords match
+    //       const options: SignOptions = {
+    //         expiresIn: '1h',
+    //       };
+    //       const email = user.email;
+    //       const token = jwt.sign({ email }, (process.env.SECRET as Secret), options, (err, token) => {
+    //         if (err) {
+    //           return res.status(400).json({
+    //             message: "Error creating token",
+    //           });
+    //         } else {
+    //           return res.status(200).json({ 
+    //             message: "Auth Passed",
+    //             token,
+    //           });
+    //         };
+    //       });
+    //     } else {
+    //       // passwords did not match
+    //       res.json({
+    //         message: "Incorrect password",
+    //       });
+    //     };
+    //   });
+    // };
   },
 ];
 

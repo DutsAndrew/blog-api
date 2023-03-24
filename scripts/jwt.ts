@@ -16,7 +16,7 @@ module.exports = new JwtStrategy(options, async (jwt_payload: JwtPayload, done: 
       return done(null, false);
     };
     if (findUser.email === jwt_payload.email) {
-      return done(null, true);
+      return done(null, findUser);
     };
   } catch(err) {
     return done(err);
