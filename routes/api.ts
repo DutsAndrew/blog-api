@@ -24,7 +24,7 @@ router.post('/post/create', auth, postController.create_post);
 router.get('/post/:id', auth, postController.get_post);
 router.put('/post/:id', auth, postController.put_post);
 router.put('/post/:id/like', auth, postController.like_post);
-router.put('/post/:id/dislike', auth, postController.unlike_post);
+router.put('/post/:id/unlike', auth, postController.unlike_post);
 router.delete('/post/:id', auth, postController.delete_post);
 
 router.get('/user/:id', auth, userController.get_user);

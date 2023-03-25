@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { AuthRequest } from '../Types/interfaces';
 import { DateTime } from 'luxon';
 const Post = require("../models/post");
+const User = require("../models/user");
 dotenv.config();
 
 exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
@@ -56,10 +57,19 @@ exports.create_post = [
         whoLiked: [userId],
       });
       const uploadPost = await newPost.save();
-      res.json({
-        message: "upload success",
-        uploadPost,
-      });
+      const updateUser = User.findById(userId);
+            updateUser.popularity += 10;
+      const updatePopularity = await User.findByIdAndUpdate(userId, updateUser);
+      if (!uploadPost) {
+        res.json({
+          message: "There was an error saving your post to the database, please try again later",
+        });
+      } else {
+        res.json({
+          message: "upload success",
+          uploadPost,
+        });
+      };
     };
   },
 ];
