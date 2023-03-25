@@ -59,6 +59,7 @@ exports.create_post = [
       const uploadPost = await newPost.save();
       const updateUser = User.findById(userId);
             updateUser.popularity += 10;
+            updateUser.posts.push(newPost);
       const updatePopularity = await User.findByIdAndUpdate(userId, updateUser);
       if (!uploadPost) {
         res.json({
@@ -134,6 +135,7 @@ exports.put_post = [
         timestamp: DateTime.now(),
         title: req.body.title,
         whoLiked: [userId],
+        _id: req.params.id,
       });
       const updatePost = await Post.findByIdAndUpdate(req.params.id, updatedPost);
       if (!updatePost) {
