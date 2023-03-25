@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import dotenv from 'dotenv';
 import { AuthRequest } from '../Types/interfaces';
 import { DateTime } from 'luxon';
+import async from 'async';
 const Post = require("../models/post");
 const User = require("../models/user");
 dotenv.config();
@@ -155,29 +156,57 @@ exports.put_post = [
 
 exports.delete_post = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const userId = req.user[0]["_id"];
-  const postToDelete = await Post.findById(req.params.id);
-  if (!postToDelete) {
-    res.json({
-      message: "Could not find that post in the database"
-    });
-  };
-  if (postToDelete.author === userId) {
-    const deleteAttempt = await Post.findByIdAndRemove(req.params.id);
-    if (!deleteAttempt) {
-      res.json({
-        message: "There was an issue deleting this post, please try again or contact the devs",
-      });
-    } else {
-      res.json({
-        message: "Success, the post was deleted",
-        deleteAttempt,
-      })
-    };
-  } else {
-    res.json({
-      message: "You are not the author of this post and therefore cannot delete it",
-    });
-  };
+  async.parallel(
+    {
+      post(callback) {
+        Post.findById(req.params.id)
+          .populate("author");
+      },
+      posts(callback) {
+        Post.find({ author: userId });
+      },
+      author(callback) {
+        User.findById(userId);
+      },
+    },
+    async (err, results) => {
+      if (err) {
+        res.json({
+          message: "What you were trying to delete could not be found, there was an issue either locating your account, the post, or other posts attached to your account",
+        });
+      } else {
+        if ((results.post as any).author._id === (results.author as any)._id) {
+          async.parallel(
+            {
+              RemovePostFromUserPosts(callback) {
+                const user = results.author;
+                const postIndex = (results.author as any).posts.indexOf(req.params.id);
+                (user as any).posts.splice(postIndex, 1);
+                const updateUser = User.findByIdAndUpdate(userId, user);
+              },
+              deletePost(callback) {
+                Post.findByIdAndRemove(req.params.id);
+              },
+            }, (err, results) => {
+              if (err) {
+                res.json({
+                  message: "There was an error removing the post from your account and also deleting it, please try again",
+                });
+              } else {
+                res.json({
+                  message: "Post successfully removed from your account and deleted from our database",
+                });
+              }
+            },
+          );
+        } else {
+          res.json({
+            message: "You are not the author of this post and therefore cannot delete it",
+          });
+        };
+      }
+    },
+  );
 };
 
 exports.like_post = async (req: AuthRequest, res: Response, next: NextFunction) => {
