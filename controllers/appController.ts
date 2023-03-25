@@ -44,7 +44,12 @@ exports.post_signup = [
     });
     if (!errors.isEmpty()) {
       res.json({
+        email: req.body.email,
         errors,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        location: req.body.location,
+        password: req.body.password,
       });
     } else {
       bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
@@ -67,87 +72,63 @@ exports.post_signup = [
 ];
 
 exports.post_login = [
-  // body("email", "You must include an email to login")
-  //   .trim()
-  //   .isEmail()
-  //   .withMessage("Your email entry is not in an email format we accept (IE. hello@gmail.com")
-  //   .isLength({ min: 1, max: 1000 })
-  //   .escape(),
-  // body("password", "You cannot login without a password entry")
-  //   .trim()
-  //   .isLength({ min: 1, max: 1000 })
-  //   .escape(),
+  body("email", "You must include an email to login")
+    .trim()
+    .isEmail()
+    .withMessage("Your email entry is not in an email format we accept (IE. hello@gmail.com")
+    .isLength({ min: 1, max: 1000 })
+    .escape(),
+  body("password", "You cannot login without a password entry")
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .escape(),
 
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const email = 'hello@gmail.com';
-
-    const user = await User.find({ email: email });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.json({
+        errors,
+        body: req.body.body,
+        title: req.body.title,
+      });
+    } else {
+      const user = await User.find({ email: req.body.email });
       if (!user) {
         // no user in db
-        return res.json({
-        message: "That email is not connected to an account"
+        res.json({
+          message: "That email is not connected to an account"
         });
       };
-      const options: SignOptions = {
-        expiresIn: '1h',
-      };
-      const userEmail = user.email;
-      const token = jwt.sign({ userEmail }, (process.env.SECRET as Secret), options, (err, token) => {
-        if (err) {
-          return res.status(400).json({
-            message: "Error creating token",
+      // user found
+      bcrypt.compare(req.body.password, user.password, (err, validated) => {
+        if (err) return next(err);
+        if (validated) {
+          // passwords match
+          const options: SignOptions = {
+            expiresIn: '1h',
+          };
+          const email = user.email;
+          const token = jwt.sign({ email }, (process.env.SECRET as Secret), options, (err, token) => {
+            if (err) {
+              res.status(400).json({
+                message: "Error creating token",
+              });
+            } else {
+              res.status(200).json({ 
+                message: "Auth Passed",
+                token,
+              });
+            };
           });
         } else {
-          return res.status(200).json({ 
-            message: "Auth Passed",
-            token,
+          // passwords did not match
+          res.json({
+            message: "Incorrect password",
           });
         };
       });
-
-    // const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-    //   res.json({
-    //     errors,
-    //   });
-    // } else {
-    //   const user = await User.find({ email: req.body.email });
-    //   if (!user) {
-    //     // no user in db
-    //     return res.json({
-    //     message: "That email is not connected to an account"
-    //     });
-    //   };
-    //   // user found
-    //   bcrypt.compare(req.body.password, user.password, (err, validated) => {
-    //     if (err) return next(err);
-    //     if (validated) {
-    //       // passwords match
-    //       const options: SignOptions = {
-    //         expiresIn: '1h',
-    //       };
-    //       const email = user.email;
-    //       const token = jwt.sign({ email }, (process.env.SECRET as Secret), options, (err, token) => {
-    //         if (err) {
-    //           return res.status(400).json({
-    //             message: "Error creating token",
-    //           });
-    //         } else {
-    //           return res.status(200).json({ 
-    //             message: "Auth Passed",
-    //             token,
-    //           });
-    //         };
-    //       });
-    //     } else {
-    //       // passwords did not match
-    //       res.json({
-    //         message: "Incorrect password",
-    //       });
-    //     };
-    //   });
-    // };
+    };
   },
 ];
 
