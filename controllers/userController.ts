@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { check, body, validationResult } from 'express-validator';
 import { AuthRequest } from '../Types/interfaces';
 import bcrypt from 'bcryptjs';
-import async from 'async';
 const User = require("../models/user");
 const Post = require("../models/post");
 const Comment = require("../models/comment");

@@ -5,6 +5,10 @@ import logger from 'morgan';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import passport from 'passport';
+import debug from 'debug';
+import compression from 'compression';
+import helmet from 'helmet';
+import RateLimit from 'express-rate-limit';
 
 const apiRouter = require('./routes/api'),
       appRouter = require('./routes/app'),
@@ -12,6 +16,11 @@ const apiRouter = require('./routes/api'),
 
 dotenv.config();
 const app = express();
+
+const limiter = RateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 20,
+});
 
 // database link in
 mongoose.set('strictQuery', false);
@@ -22,13 +31,16 @@ const mongoDB = process.env.DEVMONGODB;
     const db = mongoose.connection;
     db.on('error', console.error.bind(console, 'mongo connection error'));
   } catch(err) {
-    console.error(err);
+    debug(`Error: ${err}`);
   };
 })();
 
 // // // // // // // // // // // // // // // //
 
 passport.use(JwtStrategy);
+app.use(helmet());
+app.use(compression());
+app.use(limiter);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

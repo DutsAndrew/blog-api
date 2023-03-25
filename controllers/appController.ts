@@ -1,6 +1,6 @@
 import async from 'async';
 import { Request, Response, NextFunction } from 'express';
-import { check, body, validationResult } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import { DateTime } from 'luxon';
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
