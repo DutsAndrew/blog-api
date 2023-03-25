@@ -1,6 +1,9 @@
 {
   "name": "blog-api",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=16.13.2"
+  },
   "description": "Node.js API for blog posts",
   "main": "app.ts",
   "scripts": {
