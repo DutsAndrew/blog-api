@@ -54,6 +54,7 @@ exports.post_signup = [
     } else {
       bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
         if (err) return next(err);
+        newUser.comments = [];
         newUser.joined = DateTime.now();
         newUser.password = hashedPassword;
         newUser.popularity = 0;

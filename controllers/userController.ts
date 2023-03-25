@@ -4,6 +4,8 @@ import { AuthRequest } from '../Types/interfaces';
 import bcrypt from 'bcryptjs';
 import async from 'async';
 const User = require("../models/user");
+const Post = require("../models/post");
+const Comment = require("../models/comment");
 
 exports.get_users = async (req: Request, res: Response, next: NextFunction) => {
   const findUsers = await User.find()
@@ -30,24 +32,35 @@ exports.get_users = async (req: Request, res: Response, next: NextFunction) => {
   };
 };
 
-exports.get_user = async (req: Request, res: Response, next: NextFunction) => {
-  const retrieveUser = await User.findById(req.params.id);
-  if (!retrieveUser) {
-    res.json({
-      message: "User was not found",
-    });
-  } else {
-    const strippedUserInformation  = {
-      firstName: retrieveUser.firstName,
-      lastName: retrieveUser.lastName,
-      posts: retrieveUser.posts,
+exports.get_user = [
+  check('id').isMongoId().withMessage('Invalid Post ID'),
+
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    } else {
+      const retrieveUser = await User.findById(req.params.id);
+      if (!retrieveUser) {
+        res.json({
+          message: "User was not found",
+        });
+      } else {
+        const strippedUserInformation  = {
+          firstName: retrieveUser.firstName,
+          lastName: retrieveUser.lastName,
+          posts: retrieveUser.posts,
+        };
+        res.json({
+          message: "User found",
+          user: strippedUserInformation,
+        })
+      };
     };
-    res.json({
-      message: "User found",
-      user: strippedUserInformation,
-    })
-  };
-};
+  },
+];
 
 exports.put_user = [
   body("email", "You must have an email on file to maintain your account")
@@ -74,6 +87,8 @@ exports.put_user = [
     .withMessage("Passwords are limited to at least one character and no more than 1000 characters.")
     .escape(),
 
+  check('id').isMongoId().withMessage('Invalid Post ID'),
+
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     const updatedUser = new User({
@@ -88,7 +103,7 @@ exports.put_user = [
     if (!errors.isEmpty()) {
       res.json({
         email: req.body.email,
-        errors,
+        errors: errors.array(),
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         location: req.body.location,
@@ -128,12 +143,48 @@ exports.put_user = [
   },
 ];
 
-exports.delete_user = async (req: Request, res: Response, next: NextFunction) => {
-  async.parallel(
-    {
-      user(callback) {
-        User.findById(req.params.id)
-      }
-    },
-  );
-};
+exports.delete_user = [
+  check('id').isMongoId().withMessage('Invalid Post ID'),
+
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    } else {
+      const userData = await User.findById(req.params.id)
+      .populate("posts")
+      .populate("comments")
+    
+      userData.posts.forEach(async(post: any) => {
+        const removePost = await Post.findByIdAndRemove(post._id);
+        if (!removePost) {
+          res.json({
+            message: "We had trouble removing your post history",
+          });
+        };
+      });
+    
+      userData.comments.forEach(async(comment: any) => {
+        const removeComment = await Comment.findByIdAndRemove(comment._id);
+        if (!removeComment) {
+          res.json({
+            message: "We had trouble removing your comment history",
+          });
+        };
+      });
+    
+      const removeUser = User.findByIdAndRemove(req.params.id);
+      if (!removeUser) {
+        res.json({
+          message: "We had trouble deleting your account, but we successfully removed your posts and comments",
+        });
+      } else {
+        res.json({
+          message: "We removed all your posts, comments, and deleted your account",
+        });
+      };
+    };
+  },
+];

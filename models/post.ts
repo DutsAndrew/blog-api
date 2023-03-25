@@ -11,10 +11,12 @@ const PostSchema = new Schema({
     type: String,
     required: true,
   },
-  comments: {
-    type: Array,
-    required: true,
-  },
+  comments: [
+    { 
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comment'
+    },
+  ],
   favorites: {
     type: Number,
     required: true,

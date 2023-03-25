@@ -6,6 +6,10 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  comments: {
+    type: Array,
+    required: true,
+  },
   firstName: {
     type: String,
     required: true,

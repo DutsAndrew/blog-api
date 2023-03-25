@@ -33,7 +33,7 @@ router.delete('/user/:id', auth, userController.delete_user);
 
 router.post('/post/:id/comment/create', auth, commentController.create_comment);
 router.get('/post/:id/comments', auth, commentController.get_comments);
-router.put('/post/:id/comment', auth, commentController.put_comment);
-router.delete('/post/:id/comment', auth, commentController.delete_comment);
+router.put('/post/:id/comment/:commentId', auth, commentController.put_comment);
+router.delete('/post/:id/comment/:commentId', auth, commentController.delete_comment);
 
 module.exports = router;
