@@ -5,7 +5,7 @@
     "node": ">=16.13.2"
   },
   "description": "Node.js API for blog posts",
-  "main": "app.ts",
+  "main": "./dist/app.js",
   "scripts": {
     "ts-build": "npx tsc",
     "ts-start": "node dist/app.js",

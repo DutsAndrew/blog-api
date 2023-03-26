@@ -65,7 +65,8 @@ app.use(function(err: any, req: Request, res: Response, next: NextFunction) {
 });
 
 app.listen(process.env.PORT, () => {
-  console.log(`[server]: Server is running at http://localhost:${process.env.PORT}`);
+  const host: any = '0.0.0.0';
+  console.log(`[server]: Server is running at ${host}:${process.env.PORT}`);
 });
 
 module.exports = app;

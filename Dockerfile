@@ -1,45 +1,19 @@
-FROM debian:bullseye as builder
-
-ARG NODE_VERSION=16.13.2
-
-RUN apt-get update; apt install -y curl python-is-python3 pkg-config build-essential
-RUN curl https://get.volta.sh | bash
-ENV VOLTA_HOME /root/.volta
-ENV PATH /root/.volta/bin:$PATH
-RUN volta install node@${NODE_VERSION}
-
-#######################################################################
-
-RUN mkdir /app
-WORKDIR /app
-
-# NPM will not install any package listed in "devDependencies" when NODE_ENV is set to "production",
-# to install all modules: "npm install --production=false".
-# Ref: https://docs.npmjs.com/cli/v9/commands/npm-install#description
-
-ENV NODE_ENV production
-
+# Build stage
+FROM node:16.13.2-alpine AS build
+WORKDIR /usr/app
 COPY package*.json ./
 COPY tsconfig.json ./
-COPY ./src ./src
-
-RUN npm install
+COPY ./*.ts ./
 RUN npm ci
 RUN npx tsc
-FROM debian:bullseye
+COPY ./dist ./dist
 
-LABEL fly_launch_runtime="nodejs"
-
-COPY --from=builder /root/.volta /root/.volta
-COPY --from=builder /app /app
-
-COPY --from=build-image ./usr/src/app/dist ./dist
+# Production stage
+FROM node:16.13.2-alpine
+WORKDIR /usr/app
+COPY package*.json ./
+COPY --from=build /usr/app/dist ./dist
 RUN npm ci --production
-
+COPY . .
 EXPOSE 8080
-
-WORKDIR /app
-ENV NODE_ENV production
-ENV PATH /root/.volta/bin:$PATH
-
-CMD [ "node", "dist/application.js" ]
+CMD [ "node", "dist/app.js" ]

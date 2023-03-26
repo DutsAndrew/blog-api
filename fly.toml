@@ -1,11 +1,13 @@
-# fly.toml file generated for avd-blog-api on 2023-03-25T16:10:18-06:00
+# fly.toml file generated for avd-blog-api on 2023-03-25T17:04:29-06:00
 
 app = "avd-blog-api"
 kill_signal = "SIGINT"
 kill_timeout = 5
+primary_region = "sjc"
 processes = []
 
 [env]
+  PORT = 8080
 
 [experimental]
   auto_rollback = true
