@@ -9,6 +9,7 @@ import debug from 'debug';
 import compression from 'compression';
 import helmet from 'helmet';
 import RateLimit from 'express-rate-limit';
+import cors from 'cors';
 
 const apiRouter = require('./routes/api'),
       appRouter = require('./routes/app'),
@@ -38,6 +39,7 @@ const mongoDB = process.env.DEVMONGODB;
 // // // // // // // // // // // // // // // //
 
 passport.use(JwtStrategy);
+app.use(cors());
 app.use(helmet());
 app.use(compression());
 app.use(limiter);
@@ -65,8 +67,7 @@ app.use(function(err: any, req: Request, res: Response, next: NextFunction) {
 });
 
 app.listen(process.env.PORT, () => {
-  const host: any = '0.0.0.0';
-  console.log(`[server]: Server is running at ${host}:${process.env.PORT}`);
+  console.log(`[server]: Server is running at http://localhost:${process.env.PORT}`);
 });
 
 module.exports = app;

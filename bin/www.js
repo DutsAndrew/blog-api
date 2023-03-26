@@ -4,9 +4,11 @@
  * Module dependencies.
  */
 
+import https from 'https';
+import fs from 'fs';
+
 var app = require('../dist/app');
 var debug = require('debug')('blog-api:server');
-var http = require('http');
 
 /**
  * Get port from environment and store in Express.
@@ -19,7 +21,13 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+const options = {
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.cert'),
+  secureProtocol: 'TLSv1.2'
+};
+
+var server = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.

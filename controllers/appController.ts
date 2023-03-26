@@ -45,7 +45,7 @@ exports.post_signup = [
     if (!errors.isEmpty()) {
       res.json({
         email: req.body.email,
-        errors,
+        errors: errors.array(),
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         location: req.body.location,
@@ -53,7 +53,12 @@ exports.post_signup = [
       });
     } else {
       bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
-        if (err) return next(err);
+        if (err) {
+          return res.status(500).json({
+            message: "Failed to hash password",
+            error: err,
+          });
+        };
         newUser.comments = [];
         newUser.joined = DateTime.now();
         newUser.password = hashedPassword;
