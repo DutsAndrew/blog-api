@@ -63,7 +63,11 @@ app.use(function(err: any, req: Request, res: Response, next: NextFunction) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({
+    message: "There was an error accomplishing your request",
+    error: err,
+    status: err.status,
+  });
 });
 
 app.listen(process.env.PORT, () => {
