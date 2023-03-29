@@ -1,10 +1,10 @@
-import express, { Request, Response, NextFunction} from 'express';
+import express, { Request, Response, NextFunction, Router } from 'express';
 import appController from '../controllers/appController';
 import commentController from '../controllers/commentController';
 import postController from '../controllers/postController';
 import userController from '../controllers/userController';
 import passportCustomAuth from "../scripts/authenticate";
-const router = express.Router();
+const router: Router = express.Router();
 
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
   res.json({
@@ -36,4 +36,4 @@ router.get('/post/:id/comments', passportCustomAuth, commentController.get_comme
 router.put('/post/:id/comment/:commentId', passportCustomAuth, commentController.put_comment);
 router.delete('/post/:id/comment/:commentId', passportCustomAuth, commentController.delete_comment);
 
-export default router;
+module.exports = router;

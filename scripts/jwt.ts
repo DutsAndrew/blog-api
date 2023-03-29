@@ -10,7 +10,7 @@ const options = {
   secretOrKey: process.env.SECRET,
 };
 
-const JwtAuth = new JwtStrategy(options, async (jwt_payload: JwtPayload, done: DoneCallback) => {
+module.exports = new JwtStrategy(options, async (jwt_payload: JwtPayload, done: DoneCallback) => {
   try {
     const findUser = await User.find(jwt_payload.email);
     if (!findUser) {
@@ -25,5 +25,3 @@ const JwtAuth = new JwtStrategy(options, async (jwt_payload: JwtPayload, done: D
     return done(err);
   };
 });
-
-export default JwtAuth;

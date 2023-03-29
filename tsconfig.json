@@ -1,19 +1,25 @@
 {
   "compilerOptions": {
-    "target": "esNext",
+    "target": "ES2020",
     "module": "commonjs",
+    "allowJs": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": ".",
     "strict": false,
+    "lib": ["ES2020", "dom"],
+    "types": ["node"],
+    "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "isolatedModules": true,
   },
   // this include statement tells tsc to include all TypeScript files (*.ts) in the root directory and all of its subdirectories (**/).
   "include": [
-    "**/*.ts"
+    "**/*.ts",
   ],
   "exclude": [
     "node_modules",

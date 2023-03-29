@@ -38,8 +38,10 @@ const create_comment = [
           },
           async function (comment: any, callback: any) {
             const commentId = comment._id;
-            const userToAddCommentTo = User.findById(userId);
-            userToAddCommentTo.comments.push(commentId);
+            const userToAddCommentTo = await User.findById(userId);
+            if (userToAddCommentTo) {
+              (userToAddCommentTo as any).comments.push(commentId);
+            };
             const updatedUser = await User.findByIdAndUpdate(userId, userToAddCommentTo, { new: true });
             callback(null, comment, updatedUser);
           },

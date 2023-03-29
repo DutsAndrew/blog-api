@@ -4,6 +4,6 @@ interface AuthRequest extends Request {
   user?: any;
 };
 
-export {
+export type {
   AuthRequest,
 }

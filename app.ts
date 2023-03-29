@@ -1,5 +1,5 @@
 import createError from 'http-errors';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction , Application} from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import dotenv from 'dotenv';
@@ -10,12 +10,12 @@ import compression from 'compression';
 import helmet from 'helmet';
 import RateLimit from 'express-rate-limit';
 import cors from 'cors';
-import apiRouter from './routes/api';
-import appRouter from './routes/app';
-import JwtAuth from './scripts/jwt';
+const apiRouter = require('./routes/api');
+const appRouter = require('./routes/app');
+const JwtStrategy = require('./scripts/jwt');
 
 dotenv.config();
-const app = express();
+const app: Application = express();
 
 const limiter = RateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
@@ -37,7 +37,7 @@ const mongoDB = process.env.DEVMONGODB;
 
 // // // // // // // // // // // // // // // //
 
-passport.use(JwtAuth);
+passport.use(JwtStrategy);
 app.use(cors());
 app.use(helmet());
 app.use(compression());
