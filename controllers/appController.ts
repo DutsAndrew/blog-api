@@ -1,4 +1,3 @@
-import async from 'async';
 import { Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
@@ -33,7 +32,7 @@ exports.post_signup = [
     .withMessage("Passwords are limited to at least one character and no more than 1000 characters.")
     .escape(),
   
-  async (req: Request, res: Response, next: NextFunction) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     const newUser = new User({
       email: req.body.email,
@@ -59,23 +58,25 @@ exports.post_signup = [
             error: err,
           });
         };
+
         newUser.comments = [];
         newUser.joined = DateTime.now();
         newUser.password = hashedPassword;
         newUser.popularity = 0;
         newUser.posts = [];
         newUser.role = 'Basic';
+
+        try {
+          const uploadedUser = await newUser.save();
+          if (!uploadedUser) res.json({message: "Failed to save user"});
+          res.json({
+            uploadedUser,
+          });
+        } catch(err) {
+          return next(err);
+        };
       });
-      try {
-        const uploadedUser = await newUser.save();
-        if (!uploadedUser) res.json({message: "Failed to save user"});
-        res.json({
-          uploadedUser,
-        });
-      } catch(err) {
-        return next(err);
-      };
-    }
+    };
   },
 ];
 
@@ -96,9 +97,9 @@ exports.post_login = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.json({
-        errors,
-        body: req.body.body,
-        title: req.body.title,
+        errors: errors.array(),
+        email: req.body.email,
+        password: req.body.password,
       });
     } else {
       const user = await User.find({ email: req.body.email });
