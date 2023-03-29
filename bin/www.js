@@ -14,7 +14,7 @@ var debug = require('debug')('blog-api:server');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '8080' || "3001" || "5001" || "6001");
+var port = normalizePort(process.env.PORT || "3001" || "5001" || "6001");
 app.set('port', port);
 
 /**

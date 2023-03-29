@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { check, body, validationResult } from 'express-validator';
-import { UpdateQuery } from 'mongoose';
 import dotenv from 'dotenv';
 import { AuthRequest } from '../Types/interfaces';
 import { DateTime } from 'luxon';
 import async from 'async';
 import Post from "../models/post";
-import User, { UserDoc } from "../models/user";
+import User from "../models/user";
 dotenv.config();
 
 exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
@@ -215,12 +214,11 @@ exports.delete_post = [
               message: "What you were trying to delete could not be found, there was an issue either locating your account, the post, or other posts attached to your account",
             });
           } else {
-            const author: UserDoc = (results.author as any);
-            if ((results.post as any).author._id === author._id) {
+            const user = (results.author as any);
+            if ((results.post as any).author._id === user._id) {
               async.parallel(
                 {
                   RemovePostFromUserPosts(callback) {
-                    const user: UpdateQuery<UserDoc> = author;
                     const postIndex = (results.author as any).posts.indexOf(req.params.id);
                     user.posts.splice(postIndex, 1);
                     const updateUser = User.findByIdAndUpdate(userId, user);
@@ -268,7 +266,8 @@ exports.like_post = [
         res.json({
           message: "Could not find the post you wanted to like",
         });
-      } else {
+      };
+      if (postToLike) {
         if (!postToLike.whoLiked.includes(userId)) {
           postToLike.whoLiked.push(userId);
           postToLike.likes += 1;
@@ -304,7 +303,8 @@ exports.unlike_post = [
         res.json({
           message: "Could not find the post you wanted to remove your like from",
         });
-      } else {
+      };
+      if (postToUnlike) {
         if (!postToUnlike.whoLiked.includes(userId)) {
           const indexOfLikeToRemove = postToUnlike.whoLiked.indexOf(userId);
           postToUnlike.whoLiked.splice(indexOfLikeToRemove, 1);

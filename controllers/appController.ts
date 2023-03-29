@@ -33,9 +33,6 @@ exports.post_signup = [
     .escape(),
   
   (req: Request, res: Response, next: NextFunction) => {
-    res.json({
-      req: req.headers,
-    });
     const errors = validationResult(req);
     const newUser = new User({
       email: req.body.email,
