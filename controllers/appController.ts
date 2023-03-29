@@ -3,10 +3,10 @@ import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import { DateTime } from 'luxon';
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
+import User from "../models/user";
 import multer from 'multer';
-const User = require("../models/user");
 
-exports.post_signup = [
+const post_signup = [
   body("email", "You must provide an email in order to create an account")
     .trim()
     .isEmail()
@@ -59,7 +59,7 @@ exports.post_signup = [
         };
 
         newUser.comments = [];
-        newUser.joined = DateTime.now();
+        newUser.joined = DateTime.now().toISO();
         newUser.password = hashedPassword;
         newUser.popularity = 0;
         newUser.posts = [];
@@ -79,7 +79,7 @@ exports.post_signup = [
   },
 ];
 
-exports.post_login = [
+const post_login = [
   body("email", "You must include an email to login")
     .trim()
     .isEmail()
@@ -108,47 +108,57 @@ exports.post_login = [
           message: "That email is not connected to an account"
         });
       };
-      // user found
-      bcrypt.compare(req.body.password, user.password, (err, validated) => {
-        if (err) {
-          res.json({
-            message: "We could not hash your password",
-            error: err,
-          });
-        };
-        if (validated) {
-          // passwords match
-          const options: SignOptions = {
-            expiresIn: '1h',
+      if (user) {
+        // user found
+        bcrypt.compare(req.body.password, (user as any).password, (err, validated) => {
+          if (err) {
+            res.json({
+              message: "We could not hash your password",
+              error: err,
+            });
           };
-          const email = user.email;
-          const token = jwt.sign({ email }, (process.env.SECRET as string), options, (err, token) => {
-            if (err) {
-              res.status(400).json({
-                message: "Error creating token",
-              });
-            } else {
-              res.status(200).json({ 
-                message: "Auth Passed",
-                token,
-              });
+          if (validated) {
+            // passwords match
+            const options: SignOptions = {
+              expiresIn: '1h',
             };
-          });
-        } else {
-          // passwords did not match
-          res.json({
-            message: "Incorrect password",
-          });
-        };
-      });
+            const email = (user as any).email;
+            const token = jwt.sign({ email }, (process.env.SECRET as string), options, (err, token) => {
+              if (err) {
+                res.status(400).json({
+                  message: "Error creating token",
+                });
+              } else {
+                res.status(200).json({ 
+                  message: "Auth Passed",
+                  token,
+                });
+              };
+            });
+          } else {
+            // passwords did not match
+            res.json({
+              message: "Incorrect password",
+            });
+          };
+        });
+      };
     };
   },
 ];
 
-exports.post_upload_profile_img = [
+const post_upload_profile_img = [
   (req: Request, res: Response, next: NextFunction) => {
     res.json({
       message: "Not implemented",
     });
   },
 ];
+
+const appController = {
+  post_signup,
+  post_login,
+  post_upload_profile_img,
+};
+
+export default appController;

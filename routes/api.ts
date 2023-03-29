@@ -1,10 +1,10 @@
 import express, { Request, Response, NextFunction} from 'express';
-const router = express.Router(),
-      appController = require('../controllers/appController'),
-      commentController = require('../controllers/commentController'),
-      postController = require('../controllers/postController'),
-      userController = require('../controllers/userController'),
-      auth = require('../scripts/authenticate').passportCustomAuth;
+import appController from '../controllers/appController';
+import commentController from '../controllers/commentController';
+import postController from '../controllers/postController';
+import userController from '../controllers/userController';
+import passportCustomAuth from "../scripts/authenticate";
+const router = express.Router();
 
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
   res.json({
@@ -15,25 +15,25 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
 
 router.post('/signup', appController.post_signup);
 router.post('/login', appController.post_login);
-router.post('/upload/profile/img', auth, appController.post_upload_profile_img);
+router.post('/upload/profile/img', passportCustomAuth, appController.post_upload_profile_img);
 
-router.get('/posts', auth, postController.get_posts);
-router.get('/users', auth, userController.get_users);
+router.get('/posts', passportCustomAuth, postController.get_posts);
+router.get('/users', passportCustomAuth, userController.get_users);
 
-router.post('/post/create', auth, postController.create_post);
-router.get('/post/:id', auth, postController.get_post);
-router.put('/post/:id', auth, postController.put_post);
-router.put('/post/:id/like', auth, postController.like_post);
-router.put('/post/:id/unlike', auth, postController.unlike_post);
-router.delete('/post/:id', auth, postController.delete_post);
+router.post('/post/create', passportCustomAuth, postController.create_post);
+router.get('/post/:id', passportCustomAuth, postController.get_post);
+router.put('/post/:id', passportCustomAuth, postController.put_post);
+router.put('/post/:id/like', passportCustomAuth, postController.like_post);
+router.put('/post/:id/unlike', passportCustomAuth, postController.unlike_post);
+router.delete('/post/:id', passportCustomAuth, postController.delete_post);
 
-router.get('/user/:id', auth, userController.get_user);
-router.put('/user/:id', auth, userController.put_user);
-router.delete('/user/:id', auth, userController.delete_user);
+router.get('/user/:id', passportCustomAuth, userController.get_user);
+router.put('/user/:id', passportCustomAuth, userController.put_user);
+router.delete('/user/:id', passportCustomAuth, userController.delete_user);
 
-router.post('/post/:id/comment/create', auth, commentController.create_comment);
-router.get('/post/:id/comments', auth, commentController.get_comments);
-router.put('/post/:id/comment/:commentId', auth, commentController.put_comment);
-router.delete('/post/:id/comment/:commentId', auth, commentController.delete_comment);
+router.post('/post/:id/comment/create', passportCustomAuth, commentController.create_comment);
+router.get('/post/:id/comments', passportCustomAuth, commentController.get_comments);
+router.put('/post/:id/comment/:commentId', passportCustomAuth, commentController.put_comment);
+router.delete('/post/:id/comment/:commentId', passportCustomAuth, commentController.delete_comment);
 
-module.exports = router;
+export default router;

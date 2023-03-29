@@ -2,11 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import { check, body, validationResult } from 'express-validator';
 import { AuthRequest } from '../Types/interfaces';
 import bcrypt from 'bcryptjs';
-const User = require("../models/user");
-const Post = require("../models/post");
-const Comment = require("../models/comment");
+import User from "../models/user";
+import Post from "../models/post";
+import Comment from "../models/comment";
 
-exports.get_users = async (req: Request, res: Response, next: NextFunction) => {
+const get_users = async (req: Request, res: Response, next: NextFunction) => {
   const findUsers = await User.find()
     .sort({ popularity: 1 });
   
@@ -31,7 +31,7 @@ exports.get_users = async (req: Request, res: Response, next: NextFunction) => {
   };
 };
 
-exports.get_user = [
+const get_user = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: Request, res: Response, next: NextFunction) => {
@@ -61,7 +61,7 @@ exports.get_user = [
   },
 ];
 
-exports.put_user = [
+const put_user = [
   body("email", "You must have an email on file to maintain your account")
     .trim()
     .isEmail()
@@ -109,7 +109,7 @@ exports.put_user = [
         password: req.body.password,
       });
     } else {
-      const userLookUp = await User.find(req.params.id);
+      const userLookUp = await User.findById(req.params.id);
       if (!userLookUp) {
         res.json({
           message: "the account your trying to update is not in our database, we aborted your request",
@@ -142,7 +142,7 @@ exports.put_user = [
   },
 ];
 
-exports.delete_user = [
+const delete_user = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: Request, res: Response, next: NextFunction) => {
@@ -187,3 +187,12 @@ exports.delete_user = [
     };
   },
 ];
+
+const userController = {
+  get_users,
+  get_user,
+  put_user,
+  delete_user,
+};
+
+export default userController;

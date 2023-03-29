@@ -8,13 +8,13 @@ import Post from "../models/post";
 import User from "../models/user";
 dotenv.config();
 
-exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
+const get_posts = (req: Request, res: Response, next: NextFunction) => {
   res.json({
     message: "Not implemented",
   });
 };
 
-exports.create_post = [
+const create_post = [
   // Convert the tags to an array.
   (req: Request, res: Response, next: NextFunction) => {
     if (!Array.isArray(req.body.tags)) {
@@ -93,7 +93,7 @@ exports.create_post = [
   },
 ];
 
-exports.get_post = [
+const get_post = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: Request, res: Response, next: NextFunction) => {
@@ -122,7 +122,7 @@ exports.get_post = [
   },
 ];
 
-exports.put_post = [
+const put_post = [
   // Convert the tags to an array.
   (req: Request, res: Response, next: NextFunction) => {
     if (!Array.isArray(req.body.tags)) {
@@ -184,7 +184,7 @@ exports.put_post = [
   },
 ];
 
-exports.delete_post = [
+const delete_post = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -250,7 +250,7 @@ exports.delete_post = [
   },
 ];
 
-exports.like_post = [
+const like_post = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -287,7 +287,7 @@ exports.like_post = [
   },
 ];
 
-exports.unlike_post = [
+const unlike_post = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -323,3 +323,15 @@ exports.unlike_post = [
     };
   },
 ];
+
+const postController = {
+  get_posts,
+  create_post,
+  get_post,
+  put_post,
+  delete_post,
+  like_post,
+  unlike_post,
+};
+
+export default postController;

@@ -10,10 +10,9 @@ import compression from 'compression';
 import helmet from 'helmet';
 import RateLimit from 'express-rate-limit';
 import cors from 'cors';
-
-const apiRouter = require('./routes/api'),
-      appRouter = require('./routes/app'),
-      JwtStrategy = require('./scripts/jwt');
+import apiRouter from './routes/api';
+import appRouter from './routes/app';
+import JwtAuth from './scripts/jwt';
 
 dotenv.config();
 const app = express();
@@ -38,7 +37,7 @@ const mongoDB = process.env.DEVMONGODB;
 
 // // // // // // // // // // // // // // // //
 
-passport.use(JwtStrategy);
+passport.use(JwtAuth);
 app.use(cors());
 app.use(helmet());
 app.use(compression());

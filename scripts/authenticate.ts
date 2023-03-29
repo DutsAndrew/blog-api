@@ -1,3 +1,3 @@
 import passport from 'passport';
-
-exports.passportCustomAuth = passport.authenticate('jwt', { session: false });
+const passportCustomAuth = passport.authenticate('jwt', { session: false });
+export default passportCustomAuth;

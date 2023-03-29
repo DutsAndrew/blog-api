@@ -6,15 +6,14 @@
 
 import https from 'https';
 import fs from 'fs';
-
-var app = require('../dist/app');
-var debug = require('debug')('blog-api:server');
+import app from '../dist/app';
+import debug from 'debug';
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || "3001" || "5001" || "6001");
+const port = normalizePort(process.env.PORT);
 app.set('port', port);
 
 /**
@@ -27,7 +26,7 @@ const options = {
   secureProtocol: 'TLSv1.2'
 };
 
-var server = https.createServer(options, app);
+const server = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
