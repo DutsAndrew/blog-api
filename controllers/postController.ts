@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { check, body, validationResult } from 'express-validator';
+import { UpdateQuery } from 'mongoose';
 import dotenv from 'dotenv';
 import { AuthRequest } from '../Types/interfaces';
 import { DateTime } from 'luxon';
 import async from 'async';
-const Post = require("../models/post");
-const User = require("../models/user");
+import Post from "../models/post";
+import User, { UserDoc } from "../models/user";
 dotenv.config();
 
 exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
@@ -58,19 +59,36 @@ exports.create_post = [
         whoLiked: [userId],
       });
       const uploadPost = await newPost.save();
-      const updateUser = User.findById(userId);
-            updateUser.popularity += 10;
-            updateUser.posts.push(newPost);
-      const updatePopularity = await User.findByIdAndUpdate(userId, updateUser);
       if (!uploadPost) {
         res.json({
-          message: "There was an error saving your post to the database, please try again later",
+          message: "We were unable to upload your post, please try again",
+        });
+      };
+      const updateUser = await User.findById(userId);
+      if (!updateUser) {
+        res.json({
+          message: "User not found",
         });
       } else {
-        res.json({
-          message: "upload success",
-          uploadPost,
-        });
+        updateUser.popularity += 10;
+        updateUser.posts.push(newPost);
+        const updatePopularity = await User.findByIdAndUpdate(userId, updateUser);
+        if (!updatePopularity) {
+          const removePost = await Post.findByIdAndRemove(uploadPost._id);
+          if (!removePost) {
+            res.json({
+              message: "We encountered a large error, where your post was created, but we could not attach it to your account, and we were unable to delete the post from our database. Please reach out to the developers to fix this issue",
+            });
+          };
+          res.json({
+            message: "There was an issue added your post to your account, please try again",
+          });
+        } else {
+          res.json({
+            message: "upload success",
+            uploadPost,
+          });
+        };
       };
     };
   },
@@ -197,13 +215,14 @@ exports.delete_post = [
               message: "What you were trying to delete could not be found, there was an issue either locating your account, the post, or other posts attached to your account",
             });
           } else {
-            if ((results.post as any).author._id === (results.author as any)._id) {
+            const author: UserDoc = (results.author as any);
+            if ((results.post as any).author._id === author._id) {
               async.parallel(
                 {
                   RemovePostFromUserPosts(callback) {
-                    const user = results.author;
+                    const user: UpdateQuery<UserDoc> = author;
                     const postIndex = (results.author as any).posts.indexOf(req.params.id);
-                    (user as any).posts.splice(postIndex, 1);
+                    user.posts.splice(postIndex, 1);
                     const updateUser = User.findByIdAndUpdate(userId, user);
                   },
                   deletePost(callback) {
@@ -249,15 +268,21 @@ exports.like_post = [
         res.json({
           message: "Could not find the post you wanted to like",
         });
-      }
-      if (!postToLike.whoLiked.includes(userId)) {
-        postToLike.whoLiked.push(userId);
-        postToLike.likes += 1;
-        const addLike = await Post.findByIdAndUpdate(req.params.id, postToLike);
       } else {
-        res.json({
-          message: "Sorry, we aborted the request, your changes aren't synced with the server, please try again later",
-        });
+        if (!postToLike.whoLiked.includes(userId)) {
+          postToLike.whoLiked.push(userId);
+          postToLike.likes += 1;
+          const addLike = await Post.findByIdAndUpdate(req.params.id, postToLike);
+          if (!addLike) {
+            res.json({
+              message: "We were not able to locate this post and add your like, please try again",
+            });
+          };
+        } else {
+          res.json({
+            message: "Sorry, we aborted the request, your changes aren't synced with the server, please try again later",
+          });
+        };
       };
     };
   },
@@ -279,20 +304,21 @@ exports.unlike_post = [
         res.json({
           message: "Could not find the post you wanted to remove your like from",
         });
-      }
-      if (!postToUnlike.whoLiked.includes(userId)) {
-        const indexOfLikeToRemove = postToUnlike.whoLiked.indexOf(userId);
-        postToUnlike.whoLiked.splice(indexOfLikeToRemove, 1);
-        postToUnlike.likes -= 1;
-        const removeLike = await Post.findByIdAndUpdate(req.params.id, postToUnlike, { new: true });
-        res.json({
-          message: "We were able to unlike the post",
-          removeLike,
-        });
       } else {
-        res.json({
-          message: "Sorry, we aborted the request, your changes aren't synced with the server, please try again later",
-        });
+        if (!postToUnlike.whoLiked.includes(userId)) {
+          const indexOfLikeToRemove = postToUnlike.whoLiked.indexOf(userId);
+          postToUnlike.whoLiked.splice(indexOfLikeToRemove, 1);
+          postToUnlike.likes -= 1;
+          const removeLike = await Post.findByIdAndUpdate(req.params.id, postToUnlike, { new: true });
+          res.json({
+            message: "We were able to unlike the post",
+            removeLike,
+          });
+        } else {
+          res.json({
+            message: "Sorry, we aborted the request, your changes aren't synced with the server, please try again later",
+          });
+        };
       };
     };
   },

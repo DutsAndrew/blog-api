@@ -1,5 +1,12 @@
-import mongoose from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 const Schema = mongoose.Schema;
+
+export type CommentDoc = Document & {
+  author: import("mongoose").Schema.Types.ObjectId;
+  comment: string;
+  likes: number;
+  timestamp: string;
+};
 
 const CommentSchema = new Schema({
   author: {
@@ -12,7 +19,7 @@ const CommentSchema = new Schema({
     required: true,
   },
   likes: {
-    type: Number,
+    type: Schema.Types.Number,
     required: true,
   },
   timestamp: {
@@ -21,4 +28,6 @@ const CommentSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("Comment", CommentSchema);
+const Comment = mongoose.model<CommentDoc>("Comment", CommentSchema);
+
+export default Comment;

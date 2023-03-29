@@ -33,6 +33,9 @@ exports.post_signup = [
     .escape(),
   
   (req: Request, res: Response, next: NextFunction) => {
+    res.json({
+      req: req.headers,
+    });
     const errors = validationResult(req);
     const newUser = new User({
       email: req.body.email,
@@ -110,14 +113,19 @@ exports.post_login = [
       };
       // user found
       bcrypt.compare(req.body.password, user.password, (err, validated) => {
-        if (err) return next(err);
+        if (err) {
+          res.json({
+            message: "We could not hash your password",
+            error: err,
+          });
+        };
         if (validated) {
           // passwords match
           const options: SignOptions = {
             expiresIn: '1h',
           };
           const email = user.email;
-          const token = jwt.sign({ email }, (process.env.SECRET as Secret), options, (err, token) => {
+          const token = jwt.sign({ email }, (process.env.SECRET as string), options, (err, token) => {
             if (err) {
               res.status(400).json({
                 message: "Error creating token",

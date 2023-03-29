@@ -1,13 +1,27 @@
-import mongoose from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
+export type UserDoc = Document & {
+  email: string;
+  comments: string[];
+  firstName: string;
+  img: string;
+  joined: string;
+  lastName: string;
+  location: string;
+  password: string;
+  popularity: number;
+  posts: object[];
+  role: string;
+};
+
+const UserSchema = new Schema<UserDoc>({
   email: {
     type: String,
     required: true,
   },
   comments: {
-    type: Array,
+    type: [String],
     required: true,
   },
   firstName: {
@@ -39,7 +53,7 @@ const UserSchema = new Schema({
     required: true,
   },
   posts: {
-    type: Array,
+    type: [Object],
     required: true,
   },
   role: {
@@ -48,4 +62,6 @@ const UserSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("User", UserSchema);
+const User = mongoose.model<UserDoc>("User", UserSchema);
+
+export default User;

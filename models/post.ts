@@ -1,7 +1,23 @@
-import mongoose from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 const Schema = mongoose.Schema;
 
-const PostSchema = new Schema({
+export type PostDoc = Document & {
+  author: {
+    type: import("mongoose").Schema.Types.ObjectId;
+    ref: 'User';
+    required: true;
+  },
+  body: string;
+  comments: any[];
+  favorites: number;
+  likes: number;
+  tags: string[];
+  timestamp: string;
+  title: string;
+  whoLiked: string[];
+};
+
+const PostSchema = new Schema<PostDoc>({
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -13,20 +29,20 @@ const PostSchema = new Schema({
   },
   comments: [
     { 
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'Comment'
     },
   ],
   favorites: {
-    type: Number,
+    type: Schema.Types.Number,
     required: true,
   },
   likes: {
-    type: Number,
+    type: Schema.Types.Number,
     required: true,
   },
   tags: {
-    type: Array,
+    type: [String],
     required: false,
   },
   timestamp: {
@@ -38,9 +54,11 @@ const PostSchema = new Schema({
     required: true,
   },
   whoLiked: {
-    type: Array,
+    type: [String],
     required: true,
   },
 });
 
-module.exports = mongoose.model("Post", PostSchema);
+const Post =  mongoose.model<PostDoc>("Post", PostSchema);
+
+export default Post;
