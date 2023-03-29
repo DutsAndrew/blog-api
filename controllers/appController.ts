@@ -55,7 +55,6 @@ exports.post_signup = [
         if (err) {
           return res.status(500).json({
             message: "Failed to hash password",
-            error: err,
           });
         };
 
