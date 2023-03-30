@@ -3,10 +3,10 @@ import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import { DateTime } from 'luxon';
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
-import User from "../models/user";
 import multer from 'multer';
+const User = require("../models/user");
 
-const post_signup = [
+exports.post_signup = [
   body("email", "You must provide an email in order to create an account")
     .trim()
     .isEmail()
@@ -79,7 +79,7 @@ const post_signup = [
   },
 ];
 
-const post_login = [
+exports.post_login = [
   body("email", "You must include an email to login")
     .trim()
     .isEmail()
@@ -147,18 +147,10 @@ const post_login = [
   },
 ];
 
-const post_upload_profile_img = [
+exports.post_upload_profile_img = [
   (req: Request, res: Response, next: NextFunction) => {
     res.json({
       message: "Not implemented",
     });
   },
 ];
-
-const appController = {
-  post_signup,
-  post_login,
-  post_upload_profile_img,
-};
-
-export default appController;

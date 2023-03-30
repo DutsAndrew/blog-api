@@ -17,10 +17,10 @@ const JwtStrategy = require('./scripts/jwt');
 dotenv.config();
 const app: Application = express();
 
-const limiter = RateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 20,
-});
+// const limiter = RateLimit({
+//   windowMs: 1 * 60 * 1000, // 1 minute
+//   max: 20,
+// });
 
 // database link in
 mongoose.set('strictQuery', false);
@@ -41,7 +41,7 @@ passport.use(JwtStrategy);
 app.use(cors());
 app.use(helmet());
 app.use(compression());
-app.use(limiter);
+// app.use(limiter);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

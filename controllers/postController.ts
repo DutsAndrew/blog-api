@@ -4,17 +4,17 @@ import dotenv from 'dotenv';
 import { AuthRequest } from '../Types/interfaces';
 import { DateTime } from 'luxon';
 import async from 'async';
-import Post from "../models/post";
-import User from "../models/user";
+const User = require("../models/user");
+const Post = require("../models/post");
 dotenv.config();
 
-const get_posts = (req: Request, res: Response, next: NextFunction) => {
+exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
   res.json({
     message: "Not implemented",
   });
 };
 
-const create_post = [
+exports.create_post = [
   // Convert the tags to an array.
   (req: Request, res: Response, next: NextFunction) => {
     if (!Array.isArray(req.body.tags)) {
@@ -93,7 +93,7 @@ const create_post = [
   },
 ];
 
-const get_post = [
+exports.get_post = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: Request, res: Response, next: NextFunction) => {
@@ -122,7 +122,7 @@ const get_post = [
   },
 ];
 
-const put_post = [
+exports.put_post = [
   // Convert the tags to an array.
   (req: Request, res: Response, next: NextFunction) => {
     if (!Array.isArray(req.body.tags)) {
@@ -184,7 +184,7 @@ const put_post = [
   },
 ];
 
-const delete_post = [
+exports.delete_post = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -250,7 +250,7 @@ const delete_post = [
   },
 ];
 
-const like_post = [
+exports.like_post = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -287,7 +287,7 @@ const like_post = [
   },
 ];
 
-const unlike_post = [
+exports.unlike_post = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -323,15 +323,3 @@ const unlike_post = [
     };
   },
 ];
-
-const postController = {
-  get_posts,
-  create_post,
-  get_post,
-  put_post,
-  delete_post,
-  like_post,
-  unlike_post,
-};
-
-export default postController;

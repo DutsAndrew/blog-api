@@ -2,9 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { check, body, validationResult } from 'express-validator';
 import { AuthRequest } from '../Types/interfaces';
 import bcrypt from 'bcryptjs';
-import User from "../models/user";
-import Post from "../models/post";
-import Comment from "../models/comment";
+const User = require("../models/user");
+const Post = require("../models/post");
+const Comment = require("../models/comment");
 
 const get_users = async (req: Request, res: Response, next: NextFunction) => {
   const findUsers = await User.find()

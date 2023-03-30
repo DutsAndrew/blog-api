@@ -1,10 +1,10 @@
 import express, { Request, Response, NextFunction, Router } from 'express';
-import appController from '../controllers/appController';
-import commentController from '../controllers/commentController';
-import postController from '../controllers/postController';
-import userController from '../controllers/userController';
-import passportCustomAuth from "../scripts/authenticate";
 const router: Router = express.Router();
+const appController = require('../controllers/appController');
+const commentController = require('../controllers/commentController');
+const postController = require('../controllers/postController');
+const userController = require('../controllers/userController');
+const passportCustomAuth = require("../scripts/authenticate");
 
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
   res.json({

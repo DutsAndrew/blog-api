@@ -3,11 +3,11 @@ import { check, body, validationResult } from 'express-validator';
 import { DateTime } from 'luxon';
 import { AuthRequest } from '../Types/interfaces';
 import async from 'async';
-import User from "../models/user";
-import Comment from "../models/comment";
-import Post from "../models/post";
+const User = require("../models/user");
+const Post = require("../models/post");
+const Comment = require("../models/comment");
 
-const create_comment = [
+exports.create_comment = [
   body("comment", "Your comment must have a comment entered")
     .trim()
     .isLength({ min: 1, max: 10000 })
@@ -63,7 +63,7 @@ const create_comment = [
   },
 ];
 
-const get_comments = [
+exports.get_comments = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
   
   async (req: Request, res: Response, next: NextFunction) => {
@@ -90,7 +90,7 @@ const get_comments = [
   },
 ];
 
-const put_comment = [
+exports.put_comment = [
   body("comment", "Your comment must have a comment entered")
     .trim()
     .isLength({ min: 1, max: 10000 })
@@ -133,7 +133,7 @@ const put_comment = [
   },
 ];
 
-const delete_comment = [
+exports.delete_comment = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
   check('commentId').isMongoId().withMessage('Invalid comment ID'),
 
@@ -169,12 +169,3 @@ const delete_comment = [
     };
   },
 ];
-
-const commentController = {
-  create_comment,
-  get_comments,
-  put_comment,
-  delete_comment,
-};
-
-export default commentController;
