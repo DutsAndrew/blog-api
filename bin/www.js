@@ -5,7 +5,6 @@
  */
 
 const http = require('http');
-const fs = require('fs');
 const app = require('../dist/app');
 const debug = require('debug');
 

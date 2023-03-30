@@ -50,6 +50,7 @@ exports.post_signup = [
         location: req.body.location,
         password: req.body.password,
       });
+      return next(errors);
     } else {
       bcrypt.hash(req.body.password, 10, async(err, hashedPassword) => {
         if (err) {
