@@ -6,7 +6,7 @@ const User = require("../models/user");
 const Post = require("../models/post");
 const Comment = require("../models/comment");
 
-const get_users = async (req: Request, res: Response, next: NextFunction) => {
+exports.get_users = async (req: Request, res: Response, next: NextFunction) => {
   const findUsers = await User.find()
     .sort({ popularity: 1 });
   
@@ -31,7 +31,7 @@ const get_users = async (req: Request, res: Response, next: NextFunction) => {
   };
 };
 
-const get_user = [
+exports.get_user = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: Request, res: Response, next: NextFunction) => {
@@ -61,7 +61,7 @@ const get_user = [
   },
 ];
 
-const put_user = [
+exports.put_user = [
   body("email", "You must have an email on file to maintain your account")
     .trim()
     .isEmail()
@@ -142,7 +142,7 @@ const put_user = [
   },
 ];
 
-const delete_user = [
+exports.delete_user = [
   check('id').isMongoId().withMessage('Invalid Post ID'),
 
   async (req: Request, res: Response, next: NextFunction) => {
@@ -187,12 +187,3 @@ const delete_user = [
     };
   },
 ];
-
-const userController = {
-  get_users,
-  get_user,
-  put_user,
-  delete_user,
-};
-
-export default userController;
