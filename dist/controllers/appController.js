@@ -59,23 +59,35 @@ exports.post_signup = [
                         message: "Failed to hash password",
                     });
                 }
-                ;
-                newUser.comments = [];
-                newUser.joined = luxon_1.DateTime.now().toISO();
-                newUser.password = hashedPassword;
-                newUser.popularity = 0;
-                newUser.posts = [];
-                newUser.role = 'Basic';
-                try {
-                    const uploadedUser = await newUser.save();
-                    if (!uploadedUser)
-                        res.json({ message: "Failed to save user" });
-                    res.json({
-                        uploadedUser,
-                    });
-                }
-                catch (err) {
-                    return next(err);
+                else {
+                    newUser.comments = [];
+                    newUser.joined = luxon_1.DateTime.now().toISO();
+                    newUser.password = hashedPassword;
+                    newUser.popularity = 0;
+                    newUser.posts = [];
+                    newUser.role = 'Basic';
+                    try {
+                        const uploadedUser = await newUser.save();
+                        if (!uploadedUser) {
+                            res.json({
+                                message: "Failed to save user"
+                            });
+                        }
+                        else {
+                            res.json({
+                                uploadedUser,
+                            });
+                        }
+                        ;
+                    }
+                    catch (err) {
+                        res.json({
+                            message: "We were unable to upload your account to our database, please try again later",
+                            error: err,
+                        });
+                    }
+                    ;
+                    return;
                 }
                 ;
             });

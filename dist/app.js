@@ -30,10 +30,14 @@ const mongoDB = process.env.DEVMONGODB;
     try {
         await mongoose_1.default.connect(mongoDB);
         const db = mongoose_1.default.connection;
-        db.on('error', console.error.bind(console, 'mongo connection error'));
+        db.on('error', () => {
+            (0, debug_1.default)('Error: MongoDB disconnected');
+            throw new Error('MongoDB has disconnected');
+        });
     }
     catch (err) {
         (0, debug_1.default)(`Error: ${err}`);
+        throw new Error('Failed to connect to MongoDB');
     }
     ;
 })();
