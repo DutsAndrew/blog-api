@@ -51,28 +51,37 @@ exports.post_signup = [
         password: req.body.password,
       });
     } else {
-      bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+      bcrypt.hash(req.body.password, 10, async(err, hashedPassword) => {
         if (err) {
           return res.status(500).json({
             message: "Failed to hash password",
           });
-        };
+        } else {
+          newUser.comments = [];
+          newUser.joined = DateTime.now().toISO();
+          newUser.password = hashedPassword;
+          newUser.popularity = 0;
+          newUser.posts = [];
+          newUser.role = 'Basic';
 
-        newUser.comments = [];
-        newUser.joined = DateTime.now().toISO();
-        newUser.password = hashedPassword;
-        newUser.popularity = 0;
-        newUser.posts = [];
-        newUser.role = 'Basic';
-
-        try {
-          const uploadedUser = await newUser.save();
-          if (!uploadedUser) res.json({message: "Failed to save user"});
-          res.json({
-            uploadedUser,
-          });
-        } catch(err) {
-          return next(err);
+          try {
+            const uploadedUser = await newUser.save();
+            if (!uploadedUser) {
+              res.json({
+                message: "Failed to save user"
+              });
+            } else {
+              res.json({
+                uploadedUser,
+              });
+            };
+          } catch(err) {
+            res.json({
+              message: "We were unable to upload your account to our database, please try again later",
+              error: err,
+            });
+          };
+          return;
         };
       });
     };
