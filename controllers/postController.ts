@@ -38,11 +38,12 @@ exports.create_post = [
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.json({
-        message: "There were errors submitted in the form, please fix them before resubmitting",
-        title: req.body.title,
+      return res.json({
         body: req.body.body,
         errors: errors.array(),
+        message: "There were errors submitted in the form, please fix them before resubmitting",
+        tags: req.body.tags,
+        title: req.body.title,
       });
     } else {
       const userId = req.user[0]["_id"];
@@ -59,34 +60,36 @@ exports.create_post = [
       });
       const uploadPost = await newPost.save();
       if (!uploadPost) {
-        res.json({
+        return res.json({
           message: "We were unable to upload your post, please try again",
         });
-      };
-      const updateUser = await User.findById(userId);
-      if (!updateUser) {
-        res.json({
-          message: "User not found",
-        });
       } else {
-        updateUser.popularity += 10;
-        updateUser.posts.push(newPost);
-        const updatePopularity = await User.findByIdAndUpdate(userId, updateUser);
-        if (!updatePopularity) {
-          const removePost = await Post.findByIdAndRemove(uploadPost._id);
-          if (!removePost) {
-            res.json({
-              message: "We encountered a large error, where your post was created, but we could not attach it to your account, and we were unable to delete the post from our database. Please reach out to the developers to fix this issue",
-            });
-          };
-          res.json({
-            message: "There was an issue added your post to your account, please try again",
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.json({
+            message: "User not found",
           });
         } else {
-          res.json({
-            message: "upload success",
-            uploadPost,
-          });
+          user.popularity += 10;
+          user.posts.push(newPost);
+          const updateUser = await User.findByIdAndUpdate(userId, user);
+          if (!updateUser) {
+            const removePost = await Post.findByIdAndRemove(uploadPost._id);
+            if (!removePost) {
+              return res.json({
+                message: "We encountered a large error, where your post was created, but we could not attach it to your account, and we were unable to delete the post from our database. Please reach out to the developers to fix this issue",
+              });
+            } else {
+              return res.json({
+                message: "We had issues updating your account, so we deleted the post, please reupload later",
+              });
+            };
+          } else {
+            return res.json({
+              message: "upload success",
+              uploadPost,
+            });
+          };
         };
       };
     };
