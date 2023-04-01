@@ -24,6 +24,5 @@ const CommentSchema = new Schema({
         required: true,
     },
 });
-const Comment = mongoose_1.default.model("Comment", CommentSchema);
-exports.default = Comment;
+module.exports = mongoose_1.default.model("Comment", CommentSchema);
 //# sourceMappingURL=comment.js.map

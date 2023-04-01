@@ -1,8 +1,8 @@
 import { JwtPayload } from "jsonwebtoken";
 import { DoneCallback } from "passport";
-import User from '../models/user';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import dotenv from 'dotenv';
+const User = require('../models/user');
 dotenv.config();
 
 const options = {

@@ -27,11 +27,19 @@ exports.post_signup = [
         .escape(),
     (0, express_validator_1.body)("location")
         .trim()
+        .isAlpha()
         .escape(),
-    (0, express_validator_1.body)("password")
+    (0, express_validator_1.body)("password", "Passwords are required to create an account")
         .trim()
         .isLength({ min: 1, max: 1000 })
         .withMessage("Passwords are limited to at least one character and no more than 1000 characters.")
+        .escape(),
+    (0, express_validator_1.body)("confirmPassword", "You must verify your password")
+        .trim()
+        .isLength({ min: 1, max: 1000 })
+        .withMessage("Passwords are limited to at least one character and no more than 1000 characters.")
+        .custom((value, { req }) => value === req.body.password)
+        .withMessage("Your passwords do not match, please try again")
         .escape(),
     (req, res, next) => {
         const errors = (0, express_validator_1.validationResult)(req);
@@ -43,17 +51,18 @@ exports.post_signup = [
             password: req.body.password,
         });
         if (!errors.isEmpty()) {
-            res.json({
-                email: req.body.email,
+            return res.json({
                 errors: errors.array(),
+                email: req.body.email,
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 location: req.body.location,
                 password: req.body.password,
+                confirmPassword: req.body.confirmPassword,
             });
-            return next(errors);
         }
         else {
+            // no errors on form continue sanitizing data
             bcryptjs_1.default.hash(req.body.password, 10, async (err, hashedPassword) => {
                 if (err) {
                     return res.status(500).json({
@@ -70,25 +79,30 @@ exports.post_signup = [
                     try {
                         const uploadedUser = await newUser.save();
                         if (!uploadedUser) {
-                            res.json({
+                            return res.json({
                                 message: "Failed to save user"
                             });
                         }
                         else {
-                            res.json({
-                                uploadedUser,
+                            const strippedUserInformation = {
+                                email: newUser.email,
+                                firstName: newUser.firstName,
+                                lastName: newUser.lastName,
+                            };
+                            return res.json({
+                                message: "We successfully uploaded your account to our database",
+                                strippedUserInformation,
                             });
                         }
                         ;
                     }
                     catch (err) {
-                        res.json({
+                        return res.json({
                             message: "We were unable to upload your account to our database, please try again later",
                             error: err,
                         });
                     }
                     ;
-                    return;
                 }
                 ;
             });
@@ -107,10 +121,18 @@ exports.post_login = [
         .trim()
         .isLength({ min: 1, max: 1000 })
         .escape(),
+    (0, express_validator_1.body)("confirmPassword", "You must verify your password")
+        .trim()
+        .isLength({ min: 1, max: 1000 })
+        .withMessage("Passwords are limited to at least one character and no more than 1000 characters.")
+        .custom((value, { req }) => value === req.body.password)
+        .withMessage("Your passwords do not match, please try again")
+        .escape(),
     async (req, res, next) => {
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
-            res.json({
+            return res.json({
+                message: "Your form had incorrect data submitted, we are sending it back for you to fix",
                 errors: errors.array(),
                 email: req.body.email,
                 password: req.body.password,
@@ -120,22 +142,21 @@ exports.post_login = [
             const user = await User.find({ email: req.body.email });
             if (!user) {
                 // no user in db
-                res.json({
+                return res.json({
                     message: "That email is not connected to an account"
                 });
             }
-            ;
-            if (user) {
-                // user found
-                bcryptjs_1.default.compare(req.body.password, user.password, (err, validated) => {
+            else if (user.length !== 0) {
+                // user found and it's not empty
+                // user[0] in case more than one user is retrieved
+                bcryptjs_1.default.compare(req.body.password, user[0].password, (err, validated) => {
                     if (err) {
-                        res.json({
-                            message: "We could not hash your password",
+                        return res.json({
+                            message: "We had issues pulling your stored password from the database, please try again later",
                             error: err,
                         });
                     }
-                    ;
-                    if (validated) {
+                    else if (validated) {
                         // passwords match
                         const options = {
                             expiresIn: '1h',
@@ -143,12 +164,12 @@ exports.post_login = [
                         const email = user.email;
                         const token = jsonwebtoken_1.default.sign({ email }, process.env.SECRET, options, (err, token) => {
                             if (err) {
-                                res.status(400).json({
+                                return res.status(400).json({
                                     message: "Error creating token",
                                 });
                             }
                             else {
-                                res.status(200).json({
+                                return res.status(200).json({
                                     message: "Auth Passed",
                                     token,
                                 });
@@ -158,11 +179,17 @@ exports.post_login = [
                     }
                     else {
                         // passwords did not match
-                        res.json({
+                        return res.json({
                             message: "Incorrect password",
                         });
                     }
                     ;
+                });
+            }
+            else {
+                // db returned an empty user or could not find the email
+                return res.json({
+                    message: "That email is not connected to an account",
                 });
             }
             ;
