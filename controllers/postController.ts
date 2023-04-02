@@ -18,8 +18,13 @@ exports.create_post = [
   // Convert the tags to an array.
   (req: Request, res: Response, next: NextFunction) => {
     if (!Array.isArray(req.body.tags)) {
-      req.body.tags =
-        typeof req.body.tags === "undefined" ? [] : [req.body.tags];
+      if (req.body.tags.includes(',')) {
+        req.body.tags =
+          req.body.tags.split(',');
+      } else {
+        req.body.tags = 
+          typeof req.body.tags === "undefined" ? [] : [req.body.tags];
+      };
     }
     next();
   },
