@@ -6,8 +6,12 @@ You can check the status of the API here: https://avd-blog-api.fly.dev/ <br>
 Keep in mind this is an API not a Web Application, this blog API integrates with a Front-End to send and receive data.
 
 Currently this Blog-API is used with two NextJS, React, and TypeScript front-ends, those can be found here:
+<<<<<<< HEAD
 - [Blog-CMS](https://github.com/DutsAndrew/blog-cms) (Content-Management-System) - for authenticated users to perform CRUD operations on blog posts
 - [Blog-Client](https://github.com/DutsAndrew/blog-client) - a front-end application to interact with and view blog posts
+=======
+- Blog-CMS (Content-Management-System) for authenticated users to perform CRUD operations on blog posts
+>>>>>>> 47344d4 (user can fetch their posts for CRUD operations on blog-cms)
 
 Tools:
 - TypeScript

@@ -15,6 +15,22 @@ exports.get_posts = (req, res, next) => {
         message: "Not implemented",
     });
 };
+exports.get_user_posts = async (req, res, next) => {
+    const userId = req.user[0]["_id"];
+    const findPosts = await Post.find({ author: userId });
+    if (!findPosts) {
+        return res.json({
+            message: "There are no posts connected with your account",
+        });
+    }
+    else {
+        return res.json({
+            message: "We found some posts connected to your account",
+            posts: findPosts,
+        });
+    }
+    ;
+};
 exports.create_post = [
     // Convert the tags to an array.
     (req, res, next) => {

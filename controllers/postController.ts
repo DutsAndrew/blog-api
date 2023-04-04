@@ -14,6 +14,21 @@ exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
+exports.get_user_posts = async (req: Request, res: Response, next: NextFunction) => {
+  const userId = req.user[0]["_id"];
+  const findPosts = await Post.find({ author: userId });
+  if (!findPosts) {
+    return res.json({
+      message: "There are no posts connected with your account",
+    });
+  } else {
+    return res.json({
+      message: "We found some posts connected to your account",
+      posts: findPosts,
+    });
+  };
+};
+
 exports.create_post = [
   // Convert the tags to an array.
   (req: Request, res: Response, next: NextFunction) => {
