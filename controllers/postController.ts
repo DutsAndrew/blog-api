@@ -16,15 +16,28 @@ exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
 
 exports.get_user_posts = async (req: Request, res: Response, next: NextFunction) => {
   const userId = req.user[0]["_id"];
-  const findPosts = await Post.find({ author: userId });
-  if (!findPosts) {
-    return res.json({
-      message: "There are no posts connected with your account",
-    });
-  } else {
-    return res.json({
-      message: "We found some posts connected to your account",
-      posts: findPosts,
+  try {
+    const posts = await Post.find({ author: userId });
+    
+    if (!posts) {
+      return res.json({
+        message: "There are no posts connected with your account",
+      });
+
+    } else {
+      posts.sort((a, b) => {
+        return DateTime.fromISO(b.timestamp).diff(DateTime.fromISO(a.timestamp)).as('milliseconds');
+      });
+      return res.json({
+        message: "We found some posts connected to your account",
+        posts: posts,
+      });
+    };
+
+  } catch(error) {
+    res.json({
+      message: "We encountered an error",
+      error: error,
     });
   };
 };

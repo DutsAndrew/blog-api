@@ -69,7 +69,7 @@ exports.post_signup = [
           });
         } else {
           newUser.comments = [];
-          newUser.joined = DateTime.now().toISO();
+          newUser.joined = DateTime.now();
           newUser.password = hashedPassword;
           newUser.popularity = 0;
           newUser.posts = [];

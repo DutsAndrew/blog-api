@@ -71,7 +71,7 @@ exports.post_signup = [
                 }
                 else {
                     newUser.comments = [];
-                    newUser.joined = luxon_1.DateTime.now().toISO();
+                    newUser.joined = luxon_1.DateTime.now();
                     newUser.password = hashedPassword;
                     newUser.popularity = 0;
                     newUser.posts = [];
