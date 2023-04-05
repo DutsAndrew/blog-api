@@ -175,8 +175,15 @@ exports.put_post = [
     // Convert the tags to an array.
     (req, res, next) => {
         if (!Array.isArray(req.body.tags)) {
-            req.body.tags =
-                typeof req.body.tags === "undefined" ? [] : [req.body.tags];
+            if (req.body.tags.includes(',')) {
+                req.body.tags =
+                    req.body.tags.split(',');
+            }
+            else {
+                req.body.tags =
+                    typeof req.body.tags === "undefined" ? [] : [req.body.tags];
+            }
+            ;
         }
         next();
     },
@@ -194,38 +201,66 @@ exports.put_post = [
     async (req, res, next) => {
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
-            res.json({
-                message: "There were errors submitted in the form, please fix them before resubmitting",
-                title: req.body.title,
+            return res.json({
                 body: req.body.body,
                 errors: errors.array(),
+                message: "There were errors submitted in the form, please fix them before resubmitting",
+                tags: req.body.tags,
+                title: req.body.title,
             });
         }
         else {
-            const userId = req.user[0]["_id"];
-            const updatedPost = new Post({
-                author: userId,
-                body: req.body.body,
-                comments: [],
-                favorites: 0,
-                likes: 1,
-                tags: req.body.tags,
-                timestamp: luxon_1.DateTime.now(),
-                title: req.body.title,
-                whoLiked: [userId],
-                _id: req.params.id,
-            });
-            const updatePost = await Post.findByIdAndUpdate(req.params.id, updatedPost);
-            if (!updatePost) {
-                res.json({
-                    message: "Unable to update post",
-                    updatedPost,
-                });
+            try {
+                // find original post to retain some of that data in update
+                const findPost = await Post.findById(req.params.id);
+                if (!findPost) {
+                    return res.json({
+                        message: "That post does not exist",
+                    });
+                }
+                else {
+                    // check if user is the author of the post, return error if they aren't
+                    const userId = req.user[0]["_id"];
+                    if (findPost.author !== userId) {
+                        return res.json({
+                            message: "You are not the author of this post and cannot change it's contents",
+                        });
+                    }
+                    else {
+                        // add updated data and original data into new post object
+                        const updatePost = new Post({
+                            author: findPost.author,
+                            body: req.body.body,
+                            comments: findPost.comments,
+                            favorites: findPost.favorites,
+                            likes: findPost.likes,
+                            tags: req.body.tags,
+                            timestamp: findPost.timestamp,
+                            title: req.body.title,
+                            whoLiked: findPost.whoLiked,
+                            _id: req.params.id,
+                        });
+                        const uploadPost = await Post.findByIdAndUpdate(req.params.id, updatePost);
+                        if (!uploadPost) {
+                            return res.json({
+                                message: "We were unable to update your post, please try again",
+                            });
+                        }
+                        else {
+                            return res.json({
+                                message: "update success",
+                                uploadPost,
+                            });
+                        }
+                        ;
+                    }
+                }
+                ;
             }
-            else {
+            catch (error) {
                 res.json({
-                    message: "upload success",
-                    updatedPost,
+                    message: "We were not able to query the database",
+                    error: error,
                 });
             }
             ;
