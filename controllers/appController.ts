@@ -40,7 +40,7 @@ exports.post_signup = [
     .withMessage("Your passwords do not match, please try again")
     .escape(),
 
-  (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     const newUser = new User({
       email: req.body.email,
@@ -61,6 +61,28 @@ exports.post_signup = [
         confirmPassword: req.body.confirmPassword,
       });
     } else {
+
+      // check if the email has already been registered, if so abort signup
+      try {
+        const checkIfEmailAlreadyExists = await User.find({ email: req.body.email });
+        if (checkIfEmailAlreadyExists.length > 0) {
+          // email exists abort
+          return res.json({
+            message: "That email has already been taken, please try again",
+            email: req.body.email,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            location: req.body.location,
+            password: req.body.password,
+            confirmPassword: req.body.confirmPassword,
+          });
+        };
+      } catch(error) {
+        return res.json({
+          message: "We could not confirm if that email address was taken, please try again later",
+        });
+      };
+
       // no errors on form continue sanitizing data
       bcrypt.hash(req.body.password, 10, async(err, hashedPassword) => {
         if (err) {

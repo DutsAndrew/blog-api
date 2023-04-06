@@ -22,7 +22,7 @@ router.get('/users', passportCustomAuth, userController.get_users);
 
 router.post('/post/create', passportCustomAuth, postController.create_post);
 router.get('/post/:id', passportCustomAuth, postController.get_post);
-router.put('/post/:id', passportCustomAuth, postController.put_post);
+router.put('/post/update/:id', passportCustomAuth, postController.put_post);4
 router.put('/post/:id/like', passportCustomAuth, postController.like_post);
 router.put('/post/:id/unlike', passportCustomAuth, postController.unlike_post);
 router.delete('/post/:id', passportCustomAuth, postController.delete_post);
