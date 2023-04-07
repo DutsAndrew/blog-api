@@ -15,7 +15,7 @@ exports.create_comment = [
     .escape(),
 
   async (req: AuthRequest, res: Response, next: NextFunction) => {
-    const userId = req.user[0]["_id"];
+    const userId = req.user["_id"];
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.json({
@@ -101,7 +101,7 @@ exports.put_comment = [
   check('commentId').isMongoId().withMessage('Invalid comment ID'),
 
   async (req: AuthRequest, res: Response, next: NextFunction) => {
-    const userId = req.user[0]["_id"];
+    const userId = req.user["_id"];
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.json({
@@ -144,7 +144,7 @@ exports.delete_comment = [
         errors: errors.array(),
       });
     } else {
-      const userId = req.user[0]["_id"];
+      const userId = req.user["_id"];
       const userToDeleteCommentFrom = await User.findById(userId);
       const comments = userToDeleteCommentFrom.comments;
       const commentToRemoveIndex = comments.indexOf(req.params.commentId);

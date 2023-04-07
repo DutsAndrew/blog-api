@@ -10,10 +10,12 @@ const UserSchema = new Schema({
         type: String,
         required: true,
     },
-    comments: {
-        type: [String],
-        required: true,
-    },
+    comments: [
+        {
+            type: Schema.Types.ObjectId,
+            required: true,
+        }
+    ],
     firstName: {
         type: String,
         required: true,
@@ -42,10 +44,12 @@ const UserSchema = new Schema({
         type: Number,
         required: true,
     },
-    posts: {
-        type: [Object],
-        required: true,
-    },
+    posts: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Post'
+        },
+    ],
     role: {
         type: String,
         required: true,

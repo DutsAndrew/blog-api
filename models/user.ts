@@ -1,4 +1,5 @@
 import mongoose, { Document } from 'mongoose';
+import { ObjectId } from 'mongodb';
 const Schema = mongoose.Schema;
 
 export type UserDoc = Document & {
@@ -11,7 +12,7 @@ export type UserDoc = Document & {
   location: string;
   password: string;
   popularity: number;
-  posts: object[];
+  posts: ObjectId[];
   role: string;
 };
 
@@ -20,10 +21,12 @@ const UserSchema = new Schema<UserDoc>({
     type: String,
     required: true,
   },
-  comments: {
-    type: [String],
-    required: true,
-  },
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      required: true,
+    }
+  ],
   firstName: {
     type: String,
     required: true,
@@ -52,10 +55,12 @@ const UserSchema = new Schema<UserDoc>({
     type: Number,
     required: true,
   },
-  posts: {
-    type: [Object],
-    required: true,
-  },
+  posts: [
+    { 
+      type: Schema.Types.ObjectId,
+      ref: 'Post'
+    },
+  ],
   role: {
     type: String,
     required: true,

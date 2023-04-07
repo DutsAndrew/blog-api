@@ -3,7 +3,7 @@ import { check, body, validationResult } from 'express-validator';
 import dotenv from 'dotenv';
 import { AuthRequest } from '../Types/interfaces';
 import { DateTime } from 'luxon';
-import async from 'async';
+import { ObjectId } from 'mongodb';
 const User = require("../models/user");
 const Post = require("../models/post");
 dotenv.config();
@@ -15,10 +15,11 @@ exports.get_posts = (req: Request, res: Response, next: NextFunction) => {
 };
 
 exports.get_user_posts = async (req: Request, res: Response, next: NextFunction) => {
-  const userId = req.user[0]["_id"];
+  const userId = req.user["_id"];
+  console.log(userId);
   try {
     const posts = await Post.find({ author: userId });
-    
+    console.log(posts);
     if (!posts) {
       return res.json({
         message: "There are no posts connected with your account",
@@ -79,7 +80,7 @@ exports.create_post = [
         title: req.body.title,
       });
     } else {
-      const userId = req.user[0]["_id"];
+      const userId = req.user["_id"];
       const newPost = new Post({
         author: userId,
         body: req.body.body,
@@ -91,39 +92,45 @@ exports.create_post = [
         title: req.body.title,
         whoLiked: [userId],
       });
-      const uploadPost = await newPost.save();
-      if (!uploadPost) {
-        return res.json({
-          message: "We were unable to upload your post, please try again",
-        });
-      } else {
-        const user = await User.findById(userId);
-        if (!user) {
+      try {
+        const uploadPost = await newPost.save();
+        if (!uploadPost) {
           return res.json({
-            message: "User not found",
+            message: "We were unable to upload your post, please try again",
           });
         } else {
-          user.popularity += 10;
-          user.posts.push(newPost);
-          const updateUser = await User.findByIdAndUpdate(userId, user);
-          if (!updateUser) {
-            const removePost = await Post.findByIdAndRemove(uploadPost._id);
-            if (!removePost) {
-              return res.json({
-                message: "We encountered a large error, where your post was created, but we could not attach it to your account, and we were unable to delete the post from our database. Please reach out to the developers to fix this issue",
-              });
+          const user = await User.findById(userId);
+          if (!user) {
+            return res.json({
+              message: "User not found",
+            });
+          } else {
+            const updateUser = await User.findByIdAndUpdate(userId, {
+              $inc: { popularity: 10 },
+              $push: { posts: uploadPost._id },
+            });
+            if (!updateUser) {
+              const removePost = await Post.findByIdAndRemove(uploadPost._id);
+              if (!removePost) {
+                const err = new Error(`${uploadPost._id} was uploaded with no author`);
+                throw err;
+              } else {
+                return res.json({
+                  message: "We had issues updating your account, so we deleted the post, please reupload later",
+                });
+              };
             } else {
               return res.json({
-                message: "We had issues updating your account, so we deleted the post, please reupload later",
+                message: "upload success",
+                uploadPost,
               });
             };
-          } else {
-            return res.json({
-              message: "upload success",
-              uploadPost,
-            });
           };
         };
+      } catch(error) {
+        return res.json({
+          message: "Server error",
+        });
       };
     };
   },
@@ -206,8 +213,8 @@ exports.put_post = [
           });
         } else {
           // check if user is the author of the post, return error if they aren't
-          const userId = req.user[0]["_id"];
-          if (findPost.author !== userId) {
+          const userId = req.user["_id"];
+          if (findPost.author.toString() !== userId.toString()) {
             return res.json({
               message: "You are not the author of this post and cannot change it's contents",
             });
@@ -258,58 +265,37 @@ exports.delete_post = [
         errors: errors.array(),
       });
     } else {
-      const userId = req.user[0]["_id"];
-      async.parallel(
-        {
-          post(callback) {
-            Post.findById(req.params.id)
-              .populate("author");
-          },
-          posts(callback) {
-            Post.find({ author: userId });
-          },
-          author(callback) {
-            User.findById(userId);
-          },
-        },
-        async (err, results) => {
-          if (err) {
-            res.json({
-              message: "What you were trying to delete could not be found, there was an issue either locating your account, the post, or other posts attached to your account",
+      const userId = req.user["_id"];
+      try {
+        const retrievePost = await Post.findById(req.params.id);
+        if (!retrievePost) {
+          return res.json({
+            message: "That post does not exist",
+          });
+        } else {
+          // post exists, now check if the author of the post matches the token user
+          if (retrievePost.author === userId) {
+            const deletePost = await Post.findByIdAndRemove(req.params.id);
+            // update user to remove post from account
+            const retrieveUser = await User.findById(userId),
+                  postIndex = retrievePost.posts.indexOf(req.params.id);
+                  retrieveUser.splice(postIndex, 1);
+            const updateUser = User.findByIdAndUpdate(userId, retrieveUser);
+            return res.json({
+              message: "Post Deleted",
+              post: deletePost,
             });
           } else {
-            const user = (results.author as any);
-            if ((results.post as any).author._id === user._id) {
-              async.parallel(
-                {
-                  RemovePostFromUserPosts(callback) {
-                    const postIndex = (results.author as any).posts.indexOf(req.params.id);
-                    user.posts.splice(postIndex, 1);
-                    const updateUser = User.findByIdAndUpdate(userId, user);
-                  },
-                  deletePost(callback) {
-                    Post.findByIdAndRemove(req.params.id);
-                  },
-                }, (err, results) => {
-                  if (err) {
-                    res.json({
-                      message: "There was an error removing the post from your account and also deleting it, please try again",
-                    });
-                  } else {
-                    res.json({
-                      message: "Post successfully removed from your account and deleted from our database",
-                    });
-                  }
-                },
-              );
-            } else {
-              res.json({
-                message: "You are not the author of this post and therefore cannot delete it",
-              });
-            };
-          }
-        },
-      );
+            return res.json({
+              message: "You are not the author of this post and therefore cannot delete it",
+            });
+          };
+        };
+      } catch(error) {
+        return res.json({
+          message: "There were issues either finding the post or deleting it, please try again later",
+        });
+      };
     };
   },
 ];
@@ -324,7 +310,7 @@ exports.like_post = [
         errors: errors.array(),
       });
     } else {
-      const userId = req.user[0]["_id"];
+      const userId = req.user["_id"];
       const postToLike = await Post.findById(req.params.id);
       if (!postToLike) {
         res.json({
@@ -361,7 +347,7 @@ exports.unlike_post = [
         errors: errors.array(),
       });
     } else {
-      const userId = req.user[0]["_id"];
+      const userId = req.user["_id"];
       const postToUnlike = await Post.findById(req.params.id);
       if (!postToUnlike) {
         res.json({

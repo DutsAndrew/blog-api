@@ -27,7 +27,7 @@ router.put('/post/update/:id', passportCustomAuth, postController.put_post);
 4;
 router.put('/post/:id/like', passportCustomAuth, postController.like_post);
 router.put('/post/:id/unlike', passportCustomAuth, postController.unlike_post);
-router.delete('/post/:id', passportCustomAuth, postController.delete_post);
+router.delete('/post/delete/:id', passportCustomAuth, postController.delete_post);
 router.get('/user/posts', passportCustomAuth, postController.get_user_posts);
 router.get('/user/:id', passportCustomAuth, userController.get_user);
 router.put('/user/:id', passportCustomAuth, userController.put_user);

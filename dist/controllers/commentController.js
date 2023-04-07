@@ -16,7 +16,7 @@ exports.create_comment = [
         .withMessage("Your comment doesn't fall within our criteria of at least 1 character but no  more than 10,000")
         .escape(),
     async (req, res, next) => {
-        const userId = req.user[0]["_id"];
+        const userId = req.user["_id"];
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
             res.json({
@@ -101,7 +101,7 @@ exports.put_comment = [
     (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Post ID'),
     (0, express_validator_1.check)('commentId').isMongoId().withMessage('Invalid comment ID'),
     async (req, res, next) => {
-        const userId = req.user[0]["_id"];
+        const userId = req.user["_id"];
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
             res.json({
@@ -146,7 +146,7 @@ exports.delete_comment = [
             });
         }
         else {
-            const userId = req.user[0]["_id"];
+            const userId = req.user["_id"];
             const userToDeleteCommentFrom = await User.findById(userId);
             const comments = userToDeleteCommentFrom.comments;
             const commentToRemoveIndex = comments.indexOf(req.params.commentId);

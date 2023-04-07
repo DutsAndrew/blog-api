@@ -20,7 +20,7 @@ module.exports = new passport_jwt_1.Strategy(options, async (jwt_payload, done) 
         ;
         if (findUser) {
             if (findUser.email === jwt_payload.email) {
-                return done(null, findUser);
+                return done(null, findUser[0]);
             }
             ;
         }

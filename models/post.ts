@@ -1,23 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 const Schema = mongoose.Schema;
 
-export type PostDoc = Document & {
-  author: {
-    type: import("mongoose").Schema.Types.ObjectId;
-    ref: 'User';
-    required: true;
-  },
-  body: string;
-  comments: any[];
-  favorites: number;
-  likes: number;
-  tags: string[];
-  timestamp: string;
-  title: string;
-  whoLiked: string[];
-};
-
-const PostSchema = new Schema<PostDoc>({
+const PostSchema = new Schema({
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -59,4 +43,4 @@ const PostSchema = new Schema<PostDoc>({
   },
 });
 
-module.exports =  mongoose.model<PostDoc>("Post", PostSchema);
+module.exports =  mongoose.model("Post", PostSchema);
