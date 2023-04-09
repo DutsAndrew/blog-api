@@ -12,13 +12,13 @@ const options = {
 
 module.exports = new JwtStrategy(options, async (jwt_payload: JwtPayload, done: DoneCallback) => {
   try {
-    const findUser = await User.find(jwt_payload.email);
+    const findUser = await User.findOne({ email: jwt_payload.email });
     if (!findUser) {
       return done(null, false);
     };
     if (findUser) {
       if ((findUser as any).email === jwt_payload.email) {
-        return done(null, findUser[0]);
+        return done(null, findUser);
       };
     };
   } catch(err) {

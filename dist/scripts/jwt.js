@@ -13,14 +13,14 @@ const options = {
 };
 module.exports = new passport_jwt_1.Strategy(options, async (jwt_payload, done) => {
     try {
-        const findUser = await User.find(jwt_payload.email);
+        const findUser = await User.findOne({ email: jwt_payload.email });
         if (!findUser) {
             return done(null, false);
         }
         ;
         if (findUser) {
             if (findUser.email === jwt_payload.email) {
-                return done(null, findUser[0]);
+                return done(null, findUser);
             }
             ;
         }

@@ -155,7 +155,7 @@ exports.post_login = [
         password: req.body.password,
       });
     } else {
-      const user = await User.find({ email: req.body.email });
+      const user = await User.findOne({ email: req.body.email });
       if (!user) {
         // no user in db
         return res.json({
@@ -164,7 +164,7 @@ exports.post_login = [
       } else if (user.length !== 0) {
         // user found and it's not empty
         // user[0] in case more than one user is retrieved
-        bcrypt.compare(req.body.password, user[0].password, (err, validated) => {
+        bcrypt.compare(req.body.password, user.password, (err, validated) => {
           if (err) {
             return res.json({
               message: "We had issues pulling your stored password from the database, please try again later",

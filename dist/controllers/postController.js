@@ -16,28 +16,36 @@ exports.get_posts = (req, res, next) => {
 };
 exports.get_user_posts = async (req, res, next) => {
     const userId = req.user["_id"];
-    console.log(userId);
     try {
-        const posts = await Post.find({ author: userId });
-        console.log(posts);
-        if (!posts) {
+        const user = await User.findById(userId)
+            .populate("posts");
+        if (!user) {
             return res.json({
                 message: "There are no posts connected with your account",
             });
         }
         else {
-            posts.sort((a, b) => {
-                return luxon_1.DateTime.fromISO(b.timestamp).diff(luxon_1.DateTime.fromISO(a.timestamp)).as('milliseconds');
-            });
-            return res.json({
-                message: "We found some posts connected to your account",
-                posts: posts,
-            });
+            const posts = user.posts;
+            if (posts.length === 0) {
+                return res.json({
+                    message: "You haven't created any posts yet, time to go make some!",
+                });
+            }
+            else {
+                posts.sort((a, b) => {
+                    return luxon_1.DateTime.fromISO(b.timestamp).diff(luxon_1.DateTime.fromISO(a.timestamp)).as('milliseconds');
+                });
+                return res.json({
+                    message: "We found some posts connected to your account",
+                    posts: posts,
+                });
+            }
+            ;
         }
         ;
     }
     catch (error) {
-        res.json({
+        return res.json({
             message: "We encountered an error",
             error: error,
         });
