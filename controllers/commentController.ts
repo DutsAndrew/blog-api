@@ -7,6 +7,43 @@ const User = require("../models/user");
 const Post = require("../models/post");
 const Comment = require("../models/comment");
 
+exports.get_user_comments = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  const userId = req.user["_id"];
+  try {
+    const retrieveUserRef = await User.findById(userId)
+      .populate("comments");
+
+    if (!retrieveUserRef) {
+      return res.json({
+        message: "That user could not be found",
+      });
+    } else {
+      // user found
+      const comments = retrieveUserRef.comments;
+      if (comments.length === 0) {
+        // there are no comments
+        return res.json({
+          message: "You don't have any comments",
+        });
+      } else {
+        // found comments
+        // order them by recency and send them to client
+        comments.sort((a, b) => {
+          return DateTime.fromISO(b.timestamp).diff(DateTime.fromISO(a.timestamp)).as('milliseconds');
+        });
+        return res.json({
+          message: "We found some comments linked to your account",
+          comments: comments,
+        });
+      };
+    };
+  } catch(error) {
+    return res.json({
+      message: "We were unable to perform your request",
+    });
+  };
+};
+
 exports.create_comment = [
   body("comment", "Your comment must have a comment entered")
     .trim()

@@ -290,7 +290,7 @@ exports.delete_post = [
             const updateUser = await User.findByIdAndUpdate(userId, userRef);
             return res.json({
               message: "Post Deleted",
-              post: deletePost,
+              deletedPost: deletePost,
             });
           } else {
             return res.json({
