@@ -271,20 +271,23 @@ exports.delete_post = [
     } else {
       const userId = req.user["_id"];
       try {
-        const retrievePost = await Post.findById(req.params.id);
+        const retrievePost = await Post.findById(req.params.id)
+          .populate("author");
+
         if (!retrievePost) {
           return res.json({
             message: "That post does not exist",
           });
         } else {
           // post exists, now check if the author of the post matches the token user
-          if (retrievePost.author === userId) {
-            const deletePost = await Post.findByIdAndRemove(req.params.id);
-            // update user to remove post from account
-            const retrieveUser = await User.findById(userId),
-                  postIndex = retrievePost.posts.indexOf(req.params.id);
-                  retrieveUser.splice(postIndex, 1);
-            const updateUser = User.findByIdAndUpdate(userId, retrieveUser);
+          if (userId.toString() === retrievePost.author._id.toString()) {
+            const userRef = retrievePost.author;
+            const deletePost = await Post.findByIdAndRemove(retrievePost._id);
+            // remove post from user ref
+            const postIndex = userRef.posts.indexOf(retrievePost._id);
+            userRef.posts.splice(postIndex, 1);
+            // update userRef with removed post
+            const updateUser = await User.findByIdAndUpdate(userId, userRef);
             return res.json({
               message: "Post Deleted",
               post: deletePost,
