@@ -8,6 +8,29 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const User = require("../models/user");
 const Post = require("../models/post");
 const Comment = require("../models/comment");
+exports.get_user_account = async (req, res, next) => {
+    const userId = req.user["_id"];
+    try {
+        const userRef = await User.findById(userId);
+        // ADD IN ACCOUNT MODIFICATIONS FOR USER PROFILE IMGS
+        const strippedUserInformation = {
+            email: userRef.email,
+            firstName: userRef.firstName,
+            lastName: userRef.lastName,
+            location: userRef.location,
+        };
+        return res.json({
+            message: "User Found",
+            account: strippedUserInformation,
+        });
+    }
+    catch (error) {
+        return res.json({
+            message: "We had issues finding what you were looking for",
+        });
+    }
+    ;
+};
 exports.get_users = async (req, res, next) => {
     const findUsers = await User.find()
         .sort({ popularity: 1 });
