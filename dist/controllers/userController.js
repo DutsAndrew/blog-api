@@ -31,6 +31,91 @@ exports.get_user_account = async (req, res, next) => {
     }
     ;
 };
+exports.put_user_account = [
+    (0, express_validator_1.body)("email", "You must provide an email in order to create an account")
+        .trim()
+        .isEmail()
+        .withMessage("Your format does not match that of an email address (IE. hello@gmail.com)")
+        .isLength({ min: 1, max: 1000 })
+        .escape(),
+    (0, express_validator_1.body)("firstName", "You must provide a first name in order to create an account")
+        .trim()
+        .isLength({ min: 1, max: 1000 })
+        .withMessage("First names are limited to at least one character and no more than 1000 characters.")
+        .escape(),
+    (0, express_validator_1.body)("lastName", "You must provide a last name in order to create an account")
+        .trim()
+        .isLength({ min: 1, max: 1000 })
+        .withMessage("First names are limited to at least one character and no more than 1000 characters.")
+        .escape(),
+    (0, express_validator_1.body)("location")
+        .trim()
+        .isAlpha()
+        .escape(),
+    async (req, res, next) => {
+        const errors = (0, express_validator_1.validationResult)(req);
+        if (!errors.isEmpty()) {
+            return res.json({
+                message: "The form you submitted has some errors",
+                errors: errors.array(),
+            });
+        }
+        else {
+            try {
+                const userId = req.user["_id"];
+                const userRef = await User.findById(userId);
+                if (!userRef) {
+                    // no user found
+                    return res.json({
+                        message: "That account does not exist",
+                    });
+                }
+                else {
+                    // user found
+                    const updatedUserInstance = new User({
+                        email: req.body.email,
+                        comments: userRef.comments,
+                        firstName: req.body.firstName,
+                        img: userRef.img,
+                        joined: userRef.joined,
+                        lastName: req.body.lastName,
+                        location: req.body.location.length !== 0 ? req.body.location : userRef.location,
+                        password: userRef.password,
+                        popularity: userRef.popularity,
+                        posts: userRef.posts,
+                        role: userRef.role,
+                        _id: userId,
+                    });
+                    const uploadUpdatedUserInstance = await User.findByIdAndUpdate(userId, updatedUserInstance, { new: true });
+                    if (!uploadUpdatedUserInstance) {
+                        return res.json({
+                            message: "There were issues updating your account",
+                        });
+                    }
+                    else {
+                        const strippedUserInformation = {
+                            email: uploadUpdatedUserInstance.email,
+                            firstName: uploadUpdatedUserInstance.firstName,
+                            lastName: uploadUpdatedUserInstance.lastName,
+                            location: uploadUpdatedUserInstance.location,
+                        };
+                        return res.json({
+                            message: "We successfully updated your account",
+                            account: strippedUserInformation,
+                        });
+                    }
+                }
+                ;
+            }
+            catch (error) {
+                return res.json({
+                    message: "We had issues processing that request",
+                });
+            }
+            ;
+        }
+    },
+];
 exports.get_users = async (req, res, next) => {
     const findUsers = await User.find()
         .sort({ popularity: 1 });

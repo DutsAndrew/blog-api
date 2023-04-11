@@ -31,6 +31,7 @@ router.get('/user/posts', passportCustomAuth, postController.get_user_posts);
 router.get('/user/comments', passportCustomAuth, commentController.get_user_comments);
 router.get('/user/account', passportCustomAuth, userController.get_user_account);
 router.get('/user/:id', passportCustomAuth, userController.get_user);
+router.put('/user/account', passportCustomAuth, userController.put_user_account);
 router.put('/user/:id', passportCustomAuth, userController.put_user);
 router.delete('/user/:id', passportCustomAuth, userController.delete_user);
 
