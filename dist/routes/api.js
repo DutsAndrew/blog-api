@@ -24,7 +24,6 @@ router.get('/users', passportCustomAuth, userController.get_users);
 router.post('/post/create', passportCustomAuth, postController.create_post);
 router.get('/post/:id', passportCustomAuth, postController.get_post);
 router.put('/post/update/:id', passportCustomAuth, postController.put_post);
-4;
 router.put('/post/:id/like', passportCustomAuth, postController.like_post);
 router.put('/post/:id/unlike', passportCustomAuth, postController.unlike_post);
 router.delete('/post/delete/:id', passportCustomAuth, postController.delete_post);
@@ -33,6 +32,7 @@ router.get('/user/comments', passportCustomAuth, commentController.get_user_comm
 router.get('/user/account', passportCustomAuth, userController.get_user_account);
 router.get('/user/:id', passportCustomAuth, userController.get_user);
 router.put('/user/account', passportCustomAuth, userController.put_user_account);
+router.post('/user/password', passportCustomAuth, userController.post_new_password);
 router.put('/user/:id', passportCustomAuth, userController.put_user);
 router.delete('/user/:id', passportCustomAuth, userController.delete_user);
 router.post('/post/:id/comment/create', passportCustomAuth, commentController.create_comment);

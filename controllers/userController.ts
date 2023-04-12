@@ -290,3 +290,81 @@ exports.delete_user = [
     };
   },
 ];
+
+exports.post_new_password = [
+  body("oldPassword", "You cannot create a new password without verifying that you have access to your old password")
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage("Passwords are limited to at least one character and no more than 1000 characters.")
+    .escape(),
+  body("newPassword", "You cannot create a new password without the new password")
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage("Passwords are limited to at least one character and no more than 1000 characters.")
+    .escape(),
+  body("confirmNewPassword", "You need to verify your new password by writing it again")
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage("Passwords are limited to at least one character and no more than 1000 characters.")
+    .custom((value, { req }) => value === req.body.newPassword)
+    .withMessage("Your passwords do not match, please try again")
+    .escape(),
+
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({
+        message: "There were some errors in your form",
+        errors: errors.array(),
+      });
+    } else {
+      // data has been validated
+      const userId = req.user["_id"];
+      try {
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.json({
+            message: "That user does not exist",
+          });
+        } else {
+          // user found
+          bcrypt.compare(req.body.oldPassword, user.password, (err, validated) => {
+            if (err) {
+              return res.json({
+                message: "The password you sent does not match the one on your account",
+              });
+            };
+            if (validated) {
+              bcrypt.hash(req.body.newPassword, 10, async(err, hashedPassword) => {
+                if (err) {
+                  return res.json({
+                    message: "Issues hashing password on server, request aborted",
+                  });
+                }
+                if (hashedPassword) {
+                  user.password = hashedPassword;
+                  const updateUser = await User.findByIdAndUpdate(userId, user, { new: true });
+                  if (!updateUser) {
+                    return res.json({
+                      message: "Could not add new password to your account, please try again later",
+                    });
+                  } else {
+                    // password hashed and added to account
+                    return res.json({
+                      message: "Password has been hashed and added to your account",
+                    });
+                  };
+                };
+              });
+            };
+          });
+        };
+      } catch(error) {
+        return res.json({
+          message: "We ran into some issues on the server",
+          error: error,
+        });
+      };
+    }
+  },
+];
