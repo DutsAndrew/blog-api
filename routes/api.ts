@@ -33,6 +33,7 @@ router.get('/user/account', passportCustomAuth, userController.get_user_account)
 router.get('/user/:id', passportCustomAuth, userController.get_user);
 router.put('/user/account', passportCustomAuth, userController.put_user_account);
 router.post('/user/password', passportCustomAuth, userController.post_new_password);
+router.post('/user/delete', passportCustomAuth, userController.post_user_delete);
 router.put('/user/:id', passportCustomAuth, userController.put_user);
 router.delete('/user/:id', passportCustomAuth, userController.delete_user);
 

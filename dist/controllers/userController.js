@@ -392,4 +392,31 @@ exports.post_new_password = [
         }
     },
 ];
+exports.post_user_delete = async (req, res, next) => {
+    const userId = req.user["_id"];
+    const user = await User.findById(userId);
+    if (user._id.toString() !== userId.toString()) {
+        // signed in user does not match the user in the db
+        return res.json({
+            message: "The account your trying to access is not available",
+        });
+    }
+    else {
+        // signed in user matches user found in db
+        const deleteUser = await User.findByIdAndRemove(userId);
+        if (!deleteUser) {
+            return res.json({
+                message: "User not found",
+            });
+        }
+        else {
+            return res.json({
+                message: "Account deleted",
+                account: deleteUser,
+            });
+        }
+        ;
+    }
+    ;
+};
 //# sourceMappingURL=userController.js.map

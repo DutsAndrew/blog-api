@@ -158,8 +158,9 @@ exports.post_login = [
       const user = await User.findOne({ email: req.body.email });
       if (!user) {
         // no user in db
-        return res.json({
-          message: "That email is not connected to an account"
+        return res.status(400).json({
+          message: "That email is not connected to an account",
+          errors: "No account found",
         });
       } else if (user.length !== 0) {
         // user found and it's not empty
@@ -168,7 +169,7 @@ exports.post_login = [
           if (err) {
             return res.json({
               message: "We had issues pulling your stored password from the database, please try again later",
-              error: err,
+              errors: err,
             });
           } else if (validated) {
             // passwords match
