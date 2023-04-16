@@ -17,7 +17,7 @@ router.post('/signup', appController.post_signup);
 router.post('/login', appController.post_login);
 router.post('/upload/profile/img', passportCustomAuth, appController.post_upload_profile_img);
 
-router.get('/posts', passportCustomAuth, postController.get_posts);
+router.get('/posts/:sort', postController.get_posts);
 router.get('/users', passportCustomAuth, userController.get_users);
 
 router.post('/post/create', passportCustomAuth, postController.create_post);

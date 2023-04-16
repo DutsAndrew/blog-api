@@ -9,10 +9,55 @@ const luxon_1 = require("luxon");
 const User = require("../models/user");
 const Post = require("../models/post");
 dotenv_1.default.config();
-exports.get_posts = (req, res, next) => {
-    res.json({
-        message: "Not implemented",
-    });
+exports.get_posts = async (req, res, next) => {
+    try {
+        const posts = await Post.find();
+        if (!posts) {
+            return res.json({
+                message: "There were no posts to retrieve",
+            });
+        }
+        else {
+            if (req.params.sort === 'new') {
+                posts.sort((a, b) => {
+                    return luxon_1.DateTime.fromISO(b.timestamp).diff(luxon_1.DateTime.fromISO(a.timestamp)).as('milliseconds');
+                });
+                return res.json({
+                    message: "Posts Found",
+                    posts: posts,
+                });
+            }
+            else if (req.params.sort === 'hot') {
+                posts.sort((a, b) => {
+                    const aLikes = a.likes;
+                    const bLikes = b.likes;
+                    const aTimestamp = luxon_1.DateTime.fromISO(a.timestamp).toMillis();
+                    const bTimestamp = luxon_1.DateTime.fromISO(b.timestamp).toMillis();
+                    const aScore = aLikes / (Date.now() - aTimestamp);
+                    const bScore = bLikes / (Date.now() - bTimestamp);
+                    return bScore - aScore;
+                });
+            }
+            else if (req.params.sort === 'top') {
+                posts.sort((a, b) => {
+                    return b.likes - a.likes;
+                });
+            }
+            else {
+                return res.status(400).json({
+                    message: "Bad Request",
+                });
+            }
+            ;
+        }
+        ;
+    }
+    catch (error) {
+        return res.json({
+            message: "There were issues on the server processing this request",
+        });
+    }
+    ;
 };
 exports.get_user_posts = async (req, res, next) => {
     const userId = req.user["_id"];
