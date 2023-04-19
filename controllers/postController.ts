@@ -3,6 +3,7 @@ import { check, body, validationResult } from 'express-validator';
 import dotenv from 'dotenv';
 import { AuthRequest } from '../Types/interfaces';
 import { DateTime } from 'luxon';
+import he from 'he';
 const User = require("../models/user");
 const Post = require("../models/post");
 dotenv.config();
@@ -15,6 +16,12 @@ exports.get_posts = async (req: Request, res: Response, next: NextFunction) => {
         message: "There were no posts to retrieve",
       });
     } else {
+      // unescape characters for returning to client
+      posts.forEach((post) => {
+        post.title = he.decode(post.title);
+        post.body = he.decode(post.body);
+      });
+
       if (req.params.sort === 'new') {
         posts.sort((a, b) => {
           return DateTime.fromISO(b.timestamp).diff(DateTime.fromISO(a.timestamp)).as('milliseconds');
@@ -35,9 +42,17 @@ exports.get_posts = async (req: Request, res: Response, next: NextFunction) => {
           
           return bScore - aScore;
         });
+        return res.json({
+          message: "Posts Found",
+          posts: posts,
+        });
       } else if (req.params.sort === 'top') {
         posts.sort((a, b) => {
           return b.likes - a.likes;
+        });
+        return res.json({
+          message: "Posts Found",
+          posts: posts,
         });
       } else {
         return res.status(400).json({
@@ -65,6 +80,13 @@ exports.get_user_posts = async (req: Request, res: Response, next: NextFunction)
       });
     } else {
       const posts = user.posts;
+
+      // unescape user posts for returning to client/cms
+      posts.forEach((post) => {
+        post.title = he.decode(post.title);
+        post.body = he.decode(post.body);
+      });
+
       if (posts.length === 0) {
         return res.json({
           message: "You haven't created any posts yet, time to go make some!",
@@ -191,15 +213,20 @@ exports.get_post = [
       });
     } else {
       try {
-        const findPost = await Post.findById(req.params.id);
-        if (!findPost) {
+        const post = await Post.findById(req.params.id);
+        if (!post) {
           res.json({
             message: "post not found",
           });
         } else {
+          post.title = he.decode(post.title);
+          post.body = he.decode(post.body);
+          post.comments.forEach((comment) => {
+            comment.comment = he.decode(comment);
+          });
           res.json({
             message: "post found",
-            findPost,
+            post,
           });
         };
       } catch(err) {

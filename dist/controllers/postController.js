@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_validator_1 = require("express-validator");
 const dotenv_1 = __importDefault(require("dotenv"));
 const luxon_1 = require("luxon");
+const he_1 = __importDefault(require("he"));
 const User = require("../models/user");
 const Post = require("../models/post");
 dotenv_1.default.config();
@@ -18,6 +19,11 @@ exports.get_posts = async (req, res, next) => {
             });
         }
         else {
+            // unescape characters for returning to client
+            posts.forEach((post) => {
+                post.title = he_1.default.decode(post.title);
+                post.body = he_1.default.decode(post.body);
+            });
             if (req.params.sort === 'new') {
                 posts.sort((a, b) => {
                     return luxon_1.DateTime.fromISO(b.timestamp).diff(luxon_1.DateTime.fromISO(a.timestamp)).as('milliseconds');
@@ -37,10 +43,18 @@ exports.get_posts = async (req, res, next) => {
                     const bScore = bLikes / (Date.now() - bTimestamp);
                     return bScore - aScore;
                 });
+                return res.json({
+                    message: "Posts Found",
+                    posts: posts,
+                });
             }
             else if (req.params.sort === 'top') {
                 posts.sort((a, b) => {
                     return b.likes - a.likes;
+                });
+                return res.json({
+                    message: "Posts Found",
+                    posts: posts,
                 });
             }
             else {
@@ -71,6 +85,11 @@ exports.get_user_posts = async (req, res, next) => {
         }
         else {
             const posts = user.posts;
+            // unescape user posts for returning to client/cms
+            posts.forEach((post) => {
+                post.title = he_1.default.decode(post.title);
+                post.body = he_1.default.decode(post.body);
+            });
             if (posts.length === 0) {
                 return res.json({
                     message: "You haven't created any posts yet, time to go make some!",
@@ -212,16 +231,21 @@ exports.get_post = [
         }
         else {
             try {
-                const findPost = await Post.findById(req.params.id);
-                if (!findPost) {
+                const post = await Post.findById(req.params.id);
+                if (!post) {
                     res.json({
                         message: "post not found",
                     });
                 }
                 else {
+                    post.title = he_1.default.decode(post.title);
+                    post.body = he_1.default.decode(post.body);
+                    post.comments.forEach((comment) => {
+                        comment.comment = he_1.default.decode(comment);
+                    });
                     res.json({
                         message: "post found",
-                        findPost,
+                        post,
                     });
                 }
                 ;
