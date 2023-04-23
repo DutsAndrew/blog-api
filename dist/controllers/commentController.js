@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_validator_1 = require("express-validator");
 const luxon_1 = require("luxon");
-const async_1 = __importDefault(require("async"));
+const he_1 = __importDefault(require("he"));
 const User = require("../models/user");
 const Post = require("../models/post");
 const Comment = require("../models/comment");
@@ -30,9 +30,16 @@ exports.get_user_comments = async (req, res, next) => {
             }
             else {
                 // found comments
-                // order them by recency and send them to client
+                // decode any escaped characters and order comments by recency, sort by likes
+                comments.forEach((comment) => {
+                    comment.comment = he_1.default.decode(comment.comment);
+                });
                 comments.sort((a, b) => {
-                    return luxon_1.DateTime.fromISO(b.timestamp).diff(luxon_1.DateTime.fromISO(a.timestamp)).as('milliseconds');
+                    if (a.likes > b.likes)
+                        return -1;
+                    if (b.likes > a.likes)
+                        return 1;
+                    return 0;
                 });
                 return res.json({
                     message: "We found some comments linked to your account",
@@ -56,11 +63,15 @@ exports.create_comment = [
         .isLength({ min: 1, max: 10000 })
         .withMessage("Your comment doesn't fall within our criteria of at least 1 character but no  more than 10,000")
         .escape(),
+    (0, express_validator_1.body)("name", "Your comment must have a name entered")
+        .trim()
+        .isLength({ min: 1, max: 1000 })
+        .withMessage("Your name doesn't fall within our criteria of at least 1 character but no  more than 10,000")
+        .escape(),
     async (req, res, next) => {
-        const userId = req.user["_id"];
         const errors = (0, express_validator_1.validationResult)(req);
         if (!errors.isEmpty()) {
-            res.json({
+            return res.json({
                 errors: errors.array(),
                 comment: req.body.comment,
                 message: "Your comment submission had some errors",
@@ -68,64 +79,29 @@ exports.create_comment = [
         }
         else {
             const newComment = new Comment({
-                author: userId,
+                author: req.params.name,
                 comment: req.body.comment,
                 likes: 1,
                 timestamp: luxon_1.DateTime.now(),
             });
-            async_1.default.waterfall([
-                async function (callback) {
-                    const uploadComment = await newComment.save();
-                    callback(null, uploadComment);
-                },
-                async function (comment, callback) {
-                    const commentId = comment._id;
-                    const userToAddCommentTo = await User.findById(userId);
-                    if (userToAddCommentTo) {
-                        userToAddCommentTo.comments.push(commentId);
-                    }
-                    ;
-                    const updatedUser = await User.findByIdAndUpdate(userId, userToAddCommentTo, { new: true });
-                    callback(null, comment, updatedUser);
-                },
-            ], (err, results) => {
-                if (err) {
-                    res.json({
-                        message: "We were unable to add your comment to our database and aborted your request",
+            try {
+                const uploadComment = await newComment.save();
+                if (!uploadComment) {
+                    return res.json({
+                        message: "Failed to upload comment",
                     });
                 }
                 else {
-                    res.json({
-                        message: "Comment was saved",
-                        comment: results.comment,
+                    return res.json({
+                        message: "Comment Uploaded!",
+                        comment: uploadComment,
                     });
                 }
-            });
-        }
-        ;
-    },
-];
-exports.get_comments = [
-    (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Post ID'),
-    async (req, res, next) => {
-        const errors = (0, express_validator_1.validationResult)(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-            });
-        }
-        else {
-            const fetchPost = await Post.findById(req.params.id)
-                .populate("comments");
-            if (!fetchPost) {
-                res.json({
-                    message: "We were unable to retrieve all the comments for this post",
-                });
+                ;
             }
-            else {
-                res.json({
-                    message: "Comments retrieved successfully",
-                    comments: fetchPost.comments,
+            catch (error) {
+                return res.status(400).json({
+                    message: "We ran into some issues",
                 });
             }
             ;
@@ -133,6 +109,42 @@ exports.get_comments = [
         ;
     },
 ];
+exports.get_comments = async (req, res, next) => {
+    const post = await Post.findById(req.params.id)
+        .populate("comments");
+    if (!post) {
+        return res.json({
+            message: "We were unable to retrieve all the comments for this post",
+        });
+    }
+    else {
+        // decode any escaped characters and order comments by recency, sort by likes
+        const comments = post.comments;
+        if (comments.length === 0) {
+            return res.json({
+                message: "This post doesn't currently have comments, be the first!",
+            });
+        }
+        else {
+            comments.forEach((comment) => {
+                comment.comment = he_1.default.decode(comment.comment);
+            });
+            comments.sort((a, b) => {
+                if (a.likes > b.likes)
+                    return -1;
+                if (b.likes > a.likes)
+                    return 1;
+                return 0;
+            });
+            return res.json({
+                message: "Comments retrieved successfully",
+                comments: comments,
+            });
+        }
+        ;
+    }
+    ;
+};
 exports.put_comment = [
     (0, express_validator_1.body)("comment", "Your comment must have a comment entered")
         .trim()

@@ -2,7 +2,7 @@ import mongoose, { Document } from 'mongoose';
 const Schema = mongoose.Schema;
 
 export type CommentDoc = Document & {
-  author: import("mongoose").Schema.Types.ObjectId;
+  author: string;
   comment: string;
   likes: number;
   timestamp: string;
@@ -10,8 +10,7 @@ export type CommentDoc = Document & {
 
 const CommentSchema = new Schema({
   author: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
+    type: String,
     required: true,
   },
   comment: {

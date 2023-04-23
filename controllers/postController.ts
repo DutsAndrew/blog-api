@@ -21,7 +21,6 @@ exports.get_posts = async (req: Request, res: Response, next: NextFunction) => {
         post.title = he.decode(post.title);
         post.body = he.decode(post.body);
       });
-
       if (req.params.sort === 'new') {
         posts.sort((a, b) => {
           return DateTime.fromISO(b.timestamp).diff(DateTime.fromISO(a.timestamp)).as('milliseconds');
