@@ -10,7 +10,11 @@ dotenv.config();
 
 exports.get_posts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find()
+      .populate({
+        path: "author",
+        select: "firstName lastName",
+      });
     if (!posts) {
       return res.json({
         message: "There were no posts to retrieve",
@@ -125,7 +129,7 @@ exports.create_post = [
 
   body("title", "Your post must have a title")
     .trim()
-    .isLength({ min: 1, max: 25 })
+    .isLength({ min: 1, max: 150 })
     .withMessage("The title of your post must meet our criteria of at least one character and no more than 25")
     .escape(),
   body("body", "Your post must have some body text")
