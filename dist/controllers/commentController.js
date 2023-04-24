@@ -74,12 +74,13 @@ exports.create_comment = [
             return res.json({
                 errors: errors.array(),
                 comment: req.body.comment,
+                name: req.body.name,
                 message: "Your comment submission had some errors",
             });
         }
         else {
             const newComment = new Comment({
-                author: req.params.name,
+                author: req.body.name,
                 comment: req.body.comment,
                 likes: 1,
                 timestamp: luxon_1.DateTime.now(),
@@ -92,6 +93,10 @@ exports.create_comment = [
                     });
                 }
                 else {
+                    // update post to contain comment
+                    const postToUpdate = await Post.findByIdAndUpdate(req.params.id, {
+                        $push: { comments: uploadComment._id }
+                    }, { new: true });
                     return res.json({
                         message: "Comment Uploaded!",
                         comment: uploadComment,
