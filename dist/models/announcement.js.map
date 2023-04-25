@@ -1,0 +1,1 @@
+{"version":3,"file":"announcement.js","sourceRoot":"","sources":["../../models/announcement.ts"],"names":[],"mappings":";;;;;AAAA,wDAAgC;AAChC,MAAM,MAAM,GAAG,kBAAQ,CAAC,MAAM,CAAC;AAE/B,MAAM,kBAAkB,GAAG,IAAI,MAAM,CAAC;IACpC,IAAI,EAAE;QACJ,IAAI,EAAE,MAAM;QACZ,QAAQ,EAAE,IAAI;KACf;CACF,CAAC,CAAC;AAEH,MAAM,CAAC,OAAO,GAAI,kBAAQ,CAAC,KAAK,CAAC,cAAc,EAAE,kBAAkB,CAAC,CAAC"}

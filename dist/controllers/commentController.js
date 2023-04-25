@@ -86,8 +86,8 @@ exports.create_comment = [
                 timestamp: luxon_1.DateTime.now(),
             });
             try {
-                const uploadComment = await newComment.save();
-                if (!uploadComment) {
+                const comment = await newComment.save();
+                if (!comment) {
                     return res.json({
                         message: "Failed to upload comment",
                     });
@@ -95,11 +95,12 @@ exports.create_comment = [
                 else {
                     // update post to contain comment
                     const postToUpdate = await Post.findByIdAndUpdate(req.params.id, {
-                        $push: { comments: uploadComment._id }
+                        $push: { comments: comment._id }
                     }, { new: true });
+                    comment.comment = he_1.default.decode(comment.comment);
                     return res.json({
                         message: "Comment Uploaded!",
-                        comment: uploadComment,
+                        comment: comment,
                     });
                 }
                 ;

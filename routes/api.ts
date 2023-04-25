@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction, Router } from 'express';
 const router: Router = express.Router();
 const appController = require('../controllers/appController');
+const announcementsController = require('../controllers/announcementsController');
 const commentController = require('../controllers/commentController');
 const postController = require('../controllers/postController');
 const userController = require('../controllers/userController');
@@ -19,6 +20,7 @@ router.post('/upload/profile/img', passportCustomAuth, appController.post_upload
 
 router.get('/posts/:sort', postController.get_posts);
 router.get('/users', passportCustomAuth, userController.get_users);
+router.get('/announcements', announcementsController.get_announcements);
 
 router.post('/post/create', passportCustomAuth, postController.create_post);
 router.get('/post/:id', passportCustomAuth, postController.get_post);
