@@ -95,7 +95,7 @@ exports.post_signup = [
           newUser.password = hashedPassword;
           newUser.popularity = 0;
           newUser.posts = [];
-          newUser.role = 'Basic';
+          newUser.role = 'basic';
 
           try {
             const uploadedUser = await newUser.save();
@@ -186,6 +186,7 @@ exports.post_login = [
                 return res.status(200).json({ 
                   message: "Auth Passed",
                   token,
+                  role: user.role,
                 });
               };
             });

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const AnnouncementSchema = new Schema({
-  text: {
+  announcement: {
     type: String,
     required: true,
   },

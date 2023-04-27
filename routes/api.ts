@@ -20,7 +20,9 @@ router.post('/upload/profile/img', passportCustomAuth, appController.post_upload
 
 router.get('/posts/:sort', postController.get_posts);
 router.get('/users', passportCustomAuth, userController.get_users);
+
 router.get('/announcements', announcementsController.get_announcements);
+router.post('/announcement/create', passportCustomAuth, announcementsController.post_announcement);
 
 router.post('/post/create', passportCustomAuth, postController.create_post);
 router.get('/post/:id', passportCustomAuth, postController.get_post);
