@@ -414,41 +414,44 @@ exports.delete_post = [
 exports.like_post = [
     (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Post ID'),
     async (req, res, next) => {
-        const errors = (0, express_validator_1.validationResult)(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-            });
-        }
-        else {
-            const userId = req.user["_id"];
+        try {
             const postToLike = await Post.findById(req.params.id);
-            if (!postToLike) {
-                res.json({
-                    message: "Could not find the post you wanted to like",
-                });
-            }
-            ;
             if (postToLike) {
-                if (!postToLike.whoLiked.includes(userId)) {
-                    postToLike.whoLiked.push(userId);
+                if (!postToLike.whoLiked.includes(req.params.user)) {
+                    postToLike.whoLiked.push(req.params.user);
                     postToLike.likes += 1;
-                    const addLike = await Post.findByIdAndUpdate(req.params.id, postToLike);
-                    if (!addLike) {
-                        res.json({
-                            message: "We were not able to locate this post and add your like, please try again",
+                    const updatePost = await Post.findByIdAndUpdate(req.params.id, postToLike);
+                    if (!updatePost) {
+                        return res.json({
+                            message: "Unable to like this post",
+                        });
+                    }
+                    else {
+                        return res.json({
+                            message: "Like added",
+                            status: true,
                         });
                     }
                     ;
                 }
                 else {
-                    res.json({
-                        message: "Sorry, we aborted the request, your changes aren't synced with the server, please try again later",
+                    return res.json({
+                        message: "You've already liked this post",
                     });
                 }
                 ;
             }
+            else {
+                return res.json({
+                    message: "Unable to like post",
+                });
+            }
             ;
+        }
+        catch (error) {
+            return res.json({
+                message: "That post does not exist",
+            });
         }
         ;
     },
@@ -456,40 +459,45 @@ exports.like_post = [
 exports.unlike_post = [
     (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Post ID'),
     async (req, res, next) => {
-        const errors = (0, express_validator_1.validationResult)(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-            });
-        }
-        else {
-            const userId = req.user["_id"];
+        try {
             const postToUnlike = await Post.findById(req.params.id);
-            if (!postToUnlike) {
-                res.json({
-                    message: "Could not find the post you wanted to remove your like from",
-                });
-            }
-            ;
             if (postToUnlike) {
-                if (!postToUnlike.whoLiked.includes(userId)) {
-                    const indexOfLikeToRemove = postToUnlike.whoLiked.indexOf(userId);
-                    postToUnlike.whoLiked.splice(indexOfLikeToRemove, 1);
+                if (postToUnlike.whoLiked.includes(req.params.user)) {
+                    // identify user in whoLiked list, splice it out
+                    postToUnlike.whoLiked.splice(postToUnlike.whoLiked.indexOf(req.params.user), 1);
                     postToUnlike.likes -= 1;
-                    const removeLike = await Post.findByIdAndUpdate(req.params.id, postToUnlike, { new: true });
-                    res.json({
-                        message: "We were able to unlike the post",
-                        removeLike,
-                    });
+                    const updatePost = await Post.findByIdAndUpdate(req.params.id, postToUnlike);
+                    if (!updatePost) {
+                        return res.json({
+                            message: "Unable to unlike this post",
+                        });
+                    }
+                    else {
+                        return res.json({
+                            message: "Like removed",
+                            status: true,
+                        });
+                    }
+                    ;
                 }
                 else {
-                    res.json({
-                        message: "Sorry, we aborted the request, your changes aren't synced with the server, please try again later",
+                    return res.json({
+                        message: "You've already unliked this post",
                     });
                 }
                 ;
             }
+            else {
+                return res.json({
+                    message: "Unable to unlike post",
+                });
+            }
             ;
+        }
+        catch (error) {
+            return res.json({
+                message: "That post does not exist",
+            });
         }
         ;
     },

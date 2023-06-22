@@ -27,9 +27,11 @@ router.post('/announcement/create', passportCustomAuth, announcementsController.
 router.post('/post/create', passportCustomAuth, postController.create_post);
 router.get('/post/:id', passportCustomAuth, postController.get_post);
 router.put('/post/update/:id', passportCustomAuth, postController.put_post);
-router.put('/post/:id/like', passportCustomAuth, postController.like_post);
-router.put('/post/:id/unlike', passportCustomAuth, postController.unlike_post);
 router.delete('/post/delete/:id', passportCustomAuth, postController.delete_post);
+// unregulated api routes, storage tokens are used to prevent duplicate calls
+router.put('/post/:id/like/:user', postController.like_post);
+router.put('/post/:id/unlike/:user', postController.unlike_post);
+//
 router.get('/user/posts', passportCustomAuth, postController.get_user_posts);
 router.get('/user/comments', passportCustomAuth, commentController.get_user_comments);
 router.get('/user/account', passportCustomAuth, userController.get_user_account);
