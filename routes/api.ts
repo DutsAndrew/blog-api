@@ -49,4 +49,7 @@ router.get('/post/:id/comments', commentController.get_comments);
 router.put('/post/:id/comment/:commentId', passportCustomAuth, commentController.put_comment);
 router.delete('/post/:id/comment/:commentId', passportCustomAuth, commentController.delete_comment);
 
+router.put('/comment/:id/like/:user', commentController.like_comment);
+router.put('/comment/:id/unlike/:user', commentController.unlike_comment);
+
 module.exports = router;

@@ -29,6 +29,10 @@ const CommentSchema = new Schema({
     type: String,
     required: true,
   },
+  whoLiked: {
+    type: [String],
+    required: true,
+  },
 });
 
 module.exports = mongoose.model<CommentDoc>("Comment", CommentSchema);

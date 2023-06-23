@@ -86,6 +86,7 @@ exports.create_comment = [
                 likes: 1,
                 timestamp: luxon_1.DateTime.now(),
                 user: req.body.user,
+                whoLiked: [req.body.user],
             });
             try {
                 const comment = await newComment.save();
@@ -233,6 +234,80 @@ exports.delete_comment = [
                 ;
             }
             ;
+        }
+        ;
+    },
+];
+exports.like_comment = [
+    (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Comment ID'),
+    async (req, res, next) => {
+        try {
+            const comment = await Comment.findById(req.params.id);
+            if (comment) {
+                comment.whoLiked.push(req.params.user);
+                comment.likes++;
+                const updateComment = await Comment.findByIdAndUpdate(req.params.id, comment, { new: true });
+                if (updateComment) {
+                    return res.json({
+                        message: "Your like was added",
+                        comment: updateComment,
+                    });
+                }
+                else {
+                    return res.status(404).json({
+                        message: "We were unable to perform this request",
+                    });
+                }
+                ;
+            }
+            else {
+                return res.json({
+                    message: "That comment does not exist",
+                });
+            }
+            ;
+        }
+        catch (error) {
+            return res.status(404).json({
+                message: "We were unable to perform this action"
+            });
+        }
+        ;
+    },
+];
+exports.unlike_comment = [
+    (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Comment ID'),
+    async (req, res, next) => {
+        try {
+            const comment = await Comment.findById(req.params.id);
+            if (comment) {
+                comment.whoLiked.splice(comment.whoLiked.indexOf(req.params.user), 1);
+                comment.likes--;
+                const updateComment = await Comment.findByIdAndUpdate(req.params.id, comment, { new: true });
+                if (updateComment) {
+                    return res.json({
+                        message: "Your like was removed",
+                        comment: updateComment,
+                    });
+                }
+                else {
+                    return res.status(404).json({
+                        message: "We were unable to perform this request",
+                    });
+                }
+                ;
+            }
+            else {
+                return res.json({
+                    message: "That comment does not exist",
+                });
+            }
+            ;
+        }
+        catch (error) {
+            return res.status(404).json({
+                message: "We were unable to perform this action"
+            });
         }
         ;
     },
