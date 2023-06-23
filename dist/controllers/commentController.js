@@ -58,6 +58,7 @@ exports.get_user_comments = async (req, res, next) => {
     ;
 };
 exports.create_comment = [
+    (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Post ID'),
     (0, express_validator_1.body)("comment", "Your comment must have a comment entered")
         .trim()
         .isLength({ min: 1, max: 10000 })
@@ -84,6 +85,7 @@ exports.create_comment = [
                 comment: req.body.comment,
                 likes: 1,
                 timestamp: luxon_1.DateTime.now(),
+                user: req.body.user,
             });
             try {
                 const comment = await newComment.save();

@@ -28,7 +28,7 @@ router.post('/post/create', passportCustomAuth, postController.create_post);
 router.get('/post/:id', passportCustomAuth, postController.get_post);
 router.put('/post/update/:id', passportCustomAuth, postController.put_post);
 router.delete('/post/delete/:id', passportCustomAuth, postController.delete_post);
-// unregulated api routes, storage tokens are used to prevent duplicate calls
+// unregulated api routes, local storage tokens on client are used to prevent duplicate calls
 router.put('/post/:id/like/:user', postController.like_post);
 router.put('/post/:id/unlike/:user', postController.unlike_post);
 //
@@ -41,7 +41,7 @@ router.post('/user/password', passportCustomAuth, userController.post_new_passwo
 router.post('/user/delete', passportCustomAuth, userController.post_user_delete);
 router.put('/user/:id', passportCustomAuth, userController.put_user);
 router.delete('/user/:id', passportCustomAuth, userController.delete_user);
-router.post('/post/:id/comment/create', commentController.create_comment);
+router.post('/post/:id/comment/create/:user', commentController.create_comment);
 router.get('/post/:id/comments', commentController.get_comments);
 router.put('/post/:id/comment/:commentId', passportCustomAuth, commentController.put_comment);
 router.delete('/post/:id/comment/:commentId', passportCustomAuth, commentController.delete_comment);

@@ -51,6 +51,8 @@ exports.get_user_comments = async (req: AuthRequest, res: Response, next: NextFu
 };
 
 exports.create_comment = [
+  check('id').isMongoId().withMessage('Invalid Post ID'),
+
   body("comment", "Your comment must have a comment entered")
     .trim()
     .isLength({ min: 1, max: 10000 })
@@ -77,6 +79,7 @@ exports.create_comment = [
         comment: req.body.comment,
         likes: 1,
         timestamp: DateTime.now(),
+        user: req.body.user,
       });
       try {
         const comment = await newComment.save();

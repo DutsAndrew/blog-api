@@ -22,6 +22,10 @@ const CommentSchema = new Schema({
         type: String,
         required: true,
     },
+    user: {
+        type: String,
+        required: true,
+    },
 });
 module.exports = mongoose_1.default.model("Comment", CommentSchema);
 //# sourceMappingURL=comment.js.map
