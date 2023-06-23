@@ -229,6 +229,7 @@ exports.like_comment = [
         comment.whoLiked.push(req.params.user);
         comment.likes++;
         const updateComment = await Comment.findByIdAndUpdate(req.params.id, comment, { new: true });
+        updateComment.comment = he.decode(updateComment.comment);
         if (updateComment) {
           return res.json({
             message: "Your like was added",
@@ -262,6 +263,7 @@ exports.unlike_comment = [
         comment.whoLiked.splice(comment.whoLiked.indexOf(req.params.user), 1);
         comment.likes--;
         const updateComment = await Comment.findByIdAndUpdate(req.params.id, comment, { new: true });
+        updateComment.comment = he.decode(updateComment.comment);
         if (updateComment) {
           return res.json({
             message: "Your like was removed",
