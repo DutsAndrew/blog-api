@@ -93,6 +93,8 @@ exports.create_comment = [
                 if (!comment) {
                     return res.json({
                         message: "Failed to upload comment",
+                        comment: req.body.comment,
+                        name: req.body.name,
                     });
                 }
                 else {
@@ -102,7 +104,9 @@ exports.create_comment = [
                     });
                     if (!postToUpdate) {
                         return res.json({
-                            message: "Your comment was not added"
+                            message: "Your comment was not added",
+                            comment: req.body.comment,
+                            name: req.body.name,
                         });
                     }
                     else {
@@ -118,7 +122,10 @@ exports.create_comment = [
             }
             catch (error) {
                 return res.status(400).json({
-                    message: "We ran into some issues",
+                    message: "There was an error making this request",
+                    errors: [error],
+                    comment: req.body.comment,
+                    name: req.body.name,
                 });
             }
             ;
