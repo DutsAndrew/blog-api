@@ -1,25 +1,25 @@
 // THIS CAN BE USED AS A TEMPLATE
   // Setup to update all items in a collection to have new objects added to them
 
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 mongoose.set('strictQuery', false);
 
-(async function connectToDB() {
-    const mongoDB = process.env.DEVMONGODB;
-    await mongoose.connect((mongoDB as string));
+async function connectToDB() {
+    const mongoDB = ''; // insert mongoDB URI here, do not leave or commit it to GitHub
+    await mongoose.connect(mongoDB);
     const db = mongoose.connection;
     updateCollection(db);
-})();
+};
 
 const updateCollection = async (db) => {
-    const collectionToUpdate = db.collection("posts");
-    const posts = await collectionToUpdate.find();
-
-    for (const post of posts) {
-        await collectionToUpdate.updateOne(
-            { _id: post._id },
-            { $set: { view: 1 }},
-            { upsert: false },
-        );
-    };
+    db.collection("posts").updateMany(
+        {
+            "views": { "$exists": false }
+        },
+        { 
+            "$set": { "view": 1 }
+        },
+    );
 };
+
+connectToDB();
