@@ -45,6 +45,10 @@ const PostSchema = new Schema({
         type: [String],
         required: true,
     },
+    views: {
+        type: Number,
+        required: true,
+    },
 });
 module.exports = mongoose_1.default.model("Post", PostSchema);
 //# sourceMappingURL=post.js.map

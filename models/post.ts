@@ -41,6 +41,10 @@ const PostSchema = new Schema({
     type: [String],
     required: true,
   },
+  views: {
+    type: Number,
+    required: true,
+  },
 });
 
 module.exports =  mongoose.model("Post", PostSchema);

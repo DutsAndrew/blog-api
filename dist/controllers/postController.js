@@ -169,6 +169,7 @@ exports.create_post = [
                 timestamp: luxon_1.DateTime.now(),
                 title: req.body.title,
                 whoLiked: [userId],
+                views: 1,
             });
             try {
                 const uploadPost = await newPost.save();
@@ -235,7 +236,11 @@ exports.get_post = [
         }
         else {
             try {
-                const post = await Post.findById(req.params.id);
+                const post = await Post.findByIdAndUpdate(req.params.id, {
+                    $inc: { views: 1 },
+                }, {
+                    upsert: false,
+                });
                 if (!post) {
                     res.json({
                         message: "post not found",
@@ -328,6 +333,7 @@ exports.put_post = [
                             timestamp: findPost.timestamp,
                             title: req.body.title,
                             whoLiked: findPost.whoLiked,
+                            views: findPost.views,
                             _id: req.params.id,
                         });
                         const uploadPost = await Post.findByIdAndUpdate(req.params.id, updatePost);
