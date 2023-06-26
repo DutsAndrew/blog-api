@@ -45,7 +45,6 @@ router.delete('/user/:id', passportCustomAuth, userController.delete_user);
 
 router.get('/user/posts', passportCustomAuth, postController.get_user_posts);
 router.post('/post/create', passportCustomAuth, postController.create_post);
-router.get('/post/:id', passportCustomAuth, postController.get_post);
 router.put('/post/update/:id', passportCustomAuth, postController.put_post);
 router.delete('/post/delete/:id', passportCustomAuth, postController.delete_post);
 
