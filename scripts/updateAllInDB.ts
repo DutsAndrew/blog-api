@@ -17,7 +17,10 @@ const updateCollection = async (db) => {
             "views": { "$exists": false }
         },
         { 
-            "$set": { "view": 1 }
+            "$set": { "views": 1 },
+        },
+        {
+            "upsert": false,
         },
     );
 };

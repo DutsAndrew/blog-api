@@ -225,45 +225,33 @@ exports.create_post = [
         ;
     },
 ];
-exports.get_post = [
+exports.view_post = [
     (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Post ID'),
     async (req, res, next) => {
-        const errors = (0, express_validator_1.validationResult)(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
+        try {
+            const post = await Post.findByIdAndUpdate(req.params.id, {
+                $inc: { views: 1 },
+            }, {
+                upsert: false,
             });
-        }
-        else {
-            try {
-                const post = await Post.findByIdAndUpdate(req.params.id, {
-                    $inc: { views: 1 },
-                }, {
-                    upsert: false,
+            if (!post) {
+                return res.json({
+                    message: "post not found",
                 });
-                if (!post) {
-                    res.json({
-                        message: "post not found",
-                    });
-                }
-                else {
-                    post.title = he_1.default.decode(post.title);
-                    post.body = he_1.default.decode(post.body);
-                    post.comments.forEach((comment) => {
-                        comment.comment = he_1.default.decode(comment);
-                    });
-                    res.json({
-                        message: "post found",
-                        post,
-                    });
-                }
-                ;
             }
-            catch (err) {
-                return next(err);
+            else {
+                return res.json({
+                    message: "Post viewed",
+                });
             }
             ;
         }
+        catch (err) {
+            return res.json({
+                error: err,
+            });
+        }
+        ;
     },
 ];
 exports.put_post = [

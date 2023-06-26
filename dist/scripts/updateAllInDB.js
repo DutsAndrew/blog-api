@@ -13,7 +13,9 @@ const updateCollection = async (db) => {
     db.collection("posts").updateMany({
         "views": { "$exists": false }
     }, {
-        "$set": { "view": 1 }
+        "$set": { "views": 1 },
+    }, {
+        "upsert": false,
     });
 };
 connectToDB();
