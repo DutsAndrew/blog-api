@@ -72,15 +72,15 @@ exports.create_comment = [
         comment: req.body.comment,
         name: req.body.name,
         message: "Your comment submission had some errors",
-      })
+      });
     } else {
       const newComment = new Comment({
         author: req.body.name,
         comment: req.body.comment,
         likes: 1,
         timestamp: DateTime.now(),
-        user: req.body.user,
-        whoLiked: [req.body.user],
+        user: req.params.user,
+        whoLiked: [req.params.user],
       });
       try {
         const comment = await newComment.save();
@@ -92,12 +92,18 @@ exports.create_comment = [
           // update post to contain comment
           const postToUpdate = await Post.findByIdAndUpdate(req.params.id, {
             $push: { comments: comment._id }
-          }, { new: true });
-          comment.comment = he.decode(comment.comment);
-          return res.json({
-            message: "Comment Uploaded!",
-            comment: comment,
           });
+          if (!postToUpdate) {
+            return res.json({
+              message: "Your comment was not added"
+            });
+          } else {
+            comment.comment = he.decode(comment.comment);
+            return res.json({
+              message: "Comment Uploaded!",
+              comment: comment,
+            });
+          };
         };
       } catch(error) {
         return res.status(400).json({
