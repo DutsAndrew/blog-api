@@ -236,43 +236,35 @@ exports.view_post = [
   },
 ];
 
-exports.find_posts = [
-  body("query", "You cannot make a query without submitting something to query")
-    .trim()
-    .isLength({min: 2, max: 50})
-    .withMessage("Your query does not fall within the minimum of 2 and no more than 50 characters. We highly recommend you follow this guidelines for more optimal results")
-    .escape(),
-
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const queryResults = await Post.find({
-        $or: [
-          { title: { $search: req.params.query }},
-          { tags: { $search: req.params.query }},
-        ],
-      }).sort({ score: 1 }).limit(10);
-      if (!queryResults || queryResults.length === 0) {
-        return res.json({
-          message: "We don't have any posts that match your query",
-        });
-      } else {
-        queryResults.forEach((result) => {
-          result.title = he.decode(result.title);
-          result.body = he.decode(result.body);
-        });
-
-        return res.json({
-          message: "Here's what we found",
-          posts: queryResults,
-        });
-      };
-    } catch(error) {
+exports.find_posts = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const queryResults = await Post.find({
+      $or: [
+        { title: { $search: req.params.query }},
+        { tags: { $search: req.params.query }},
+      ],
+    }).sort({ score: 1 }).limit(10);
+    if (!queryResults || queryResults.length === 0) {
       return res.json({
-        message: "Something went wrong",
+        message: "We don't have any posts that match your query",
+      });
+    } else {
+      queryResults.forEach((result) => {
+        result.title = he.decode(result.title);
+        result.body = he.decode(result.body);
+      });
+
+      return res.json({
+        message: "Here's what we found",
+        posts: queryResults,
       });
     };
-  },
-];
+  } catch(error) {
+    return res.json({
+      message: "Something went wrong",
+    });
+  };
+};
 
 exports.put_post = [
   // Convert the tags to an array.
