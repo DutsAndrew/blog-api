@@ -239,10 +239,9 @@ exports.view_post = [
 exports.find_posts = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const queryResults = await Post.find({
-      $or: [
-        { title: { $search: req.params.query }},
-        { tags: { $search: req.params.query }},
-      ],
+      $text: {
+        $search: req.params.query,
+      },
     }).sort({ score: 1 }).limit(10);
     if (!queryResults || queryResults.length === 0) {
       return res.json({
