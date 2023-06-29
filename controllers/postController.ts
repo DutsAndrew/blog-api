@@ -236,34 +236,37 @@ exports.view_post = [
   },
 ];
 
-exports.find_posts = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const queryResults = await Post.find({
-      $text: {
-        $search: req.params.query,
-      },
-    }).sort({ score: 1 }).limit(10);
-    if (!queryResults || queryResults.length === 0) {
+exports.find_posts = [
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const queryResults = await Post.find({
+        $text: { $search: req.params.query }
+      }, {
+        score: { $meta: "textScore" }
+      }).sort({ score: { $meta: "textScore" } }).limit(10);
+      if (!queryResults || queryResults.length === 0) {
+        return res.json({
+          message: "We don't have any posts that match your query",
+        });
+      } else {
+        queryResults.forEach((result) => {
+          result.title = he.decode(result.title);
+          result.body = he.decode(result.body);
+        });
+  
+        return res.json({
+          message: "Here's what we found",
+          posts: queryResults,
+        });
+      };
+    } catch(error) {
       return res.json({
-        message: "We don't have any posts that match your query",
-      });
-    } else {
-      queryResults.forEach((result) => {
-        result.title = he.decode(result.title);
-        result.body = he.decode(result.body);
-      });
-
-      return res.json({
-        message: "Here's what we found",
-        posts: queryResults,
+        message: "Something went wrong",
+        error: error.message,
       });
     };
-  } catch(error) {
-    return res.json({
-      message: "Something went wrong",
-    });
-  };
-};
+  },
+];
 
 exports.put_post = [
   // Convert the tags to an array.

@@ -22,7 +22,7 @@ router.post('/signup', appController.post_signup);
 router.post('/login', appController.post_login);
 router.get('/announcements', announcementsController.get_announcements);
 router.get('/posts/:sort', postController.get_posts);
-router.get("/post/find/:query", postController.find_posts);
+router.get('/post/find/:query', postController.find_posts);
 router.put('/post/:id/view', postController.view_post);
 router.put('/post/:id/like/:user', postController.like_post);
 router.put('/post/:id/unlike/:user', postController.unlike_post);
