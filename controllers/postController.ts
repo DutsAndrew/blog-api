@@ -74,9 +74,8 @@ exports.get_posts = async (req: Request, res: Response, next: NextFunction) => {
 exports.get_user_posts = async (req: Request, res: Response, next: NextFunction) => {
   const userId = req.user["_id"];
   try {
-    const user = await User.findById(userId)
+    const user = await User.findById(userId.toString())
       .populate("posts");
-
     if (!user) {
       return res.json({
         message: "There are no posts connected with your account",

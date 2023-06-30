@@ -80,7 +80,7 @@ exports.get_posts = async (req, res, next) => {
 exports.get_user_posts = async (req, res, next) => {
     const userId = req.user["_id"];
     try {
-        const user = await User.findById(userId)
+        const user = await User.findById(userId.toString())
             .populate("posts");
         if (!user) {
             return res.json({
