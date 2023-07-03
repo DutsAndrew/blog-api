@@ -33,6 +33,11 @@ const CommentSchema = new Schema({
     type: [String],
     required: true,
   },
+  postRef: {
+    type: Schema.Types.ObjectId,
+    ref: 'Post',
+    required: false,
+  }
 });
 
 module.exports = mongoose.model<CommentDoc>("Comment", CommentSchema);

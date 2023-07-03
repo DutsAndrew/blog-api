@@ -87,6 +87,7 @@ exports.create_comment = [
                 timestamp: luxon_1.DateTime.now(),
                 user: req.params.user,
                 whoLiked: [req.params.user],
+                postRef: req.params.id,
             });
             try {
                 const comment = await newComment.save();
@@ -169,90 +170,6 @@ exports.get_comments = async (req, res, next) => {
     }
     ;
 };
-exports.put_comment = [
-    (0, express_validator_1.body)("comment", "Your comment must have a comment entered")
-        .trim()
-        .isLength({ min: 1, max: 10000 })
-        .withMessage("Your comment doesn't fall within our criteria of at least 1 character but no  more than 10,000")
-        .escape(),
-    (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Post ID'),
-    (0, express_validator_1.check)('commentId').isMongoId().withMessage('Invalid comment ID'),
-    async (req, res, next) => {
-        const userId = req.user["_id"];
-        const errors = (0, express_validator_1.validationResult)(req);
-        if (!errors.isEmpty()) {
-            res.json({
-                errors: errors.array(),
-                comment: req.body.comment,
-                message: "Your comment submission had some errors",
-            });
-        }
-        else {
-            const oldComment = await Comment.findById(req.params.commentId);
-            const updatedComment = new Comment({
-                author: userId,
-                comment: req.body.comment,
-                likes: 1,
-                timestamp: oldComment.timestamp,
-                _id: req.params.commentId,
-            });
-            const uploadComment = await Comment.findByIdAndUpdate(req.params.commentId, updatedComment, { new: true });
-            if (!uploadComment) {
-                res.json({
-                    message: "We were unable to update your comment",
-                });
-            }
-            else {
-                res.json({
-                    message: "we were able to update your comment",
-                    comment: uploadComment,
-                });
-            }
-        }
-        ;
-    },
-];
-exports.delete_comment = [
-    (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Post ID'),
-    (0, express_validator_1.check)('commentId').isMongoId().withMessage('Invalid comment ID'),
-    async (req, res, next) => {
-        const errors = (0, express_validator_1.validationResult)(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-            });
-        }
-        else {
-            const userId = req.user["_id"];
-            const userToDeleteCommentFrom = await User.findById(userId);
-            const comments = userToDeleteCommentFrom.comments;
-            const commentToRemoveIndex = comments.indexOf(req.params.commentId);
-            comments.splice(commentToRemoveIndex, 1);
-            const updateUser = await User.findByIdAndUpdate(userId, userToDeleteCommentFrom);
-            if (!updateUser) {
-                res.json({
-                    message: "We were unable to remove the comment from your account",
-                });
-            }
-            else {
-                const deleteComment = await Comment.findByIdAndRemove(req.params.commentId);
-                if (!deleteComment) {
-                    res.json({
-                        message: "We had trouble deleting your comment",
-                    });
-                }
-                else {
-                    res.json({
-                        message: "We removed the comment from your account and our database",
-                    });
-                }
-                ;
-            }
-            ;
-        }
-        ;
-    },
-];
 exports.like_comment = [
     (0, express_validator_1.check)('id').isMongoId().withMessage('Invalid Comment ID'),
     async (req, res, next) => {
@@ -324,6 +241,63 @@ exports.unlike_comment = [
         catch (error) {
             return res.status(404).json({
                 message: "We were unable to perform this action"
+            });
+        }
+        ;
+    },
+];
+exports.delete_comment = [
+    (0, express_validator_1.check)('postId').isMongoId().withMessage('Invalid Post ID'),
+    (0, express_validator_1.check)('commentId').isMongoId().withMessage('Invalid comment ID'),
+    async (req, res, next) => {
+        const userId = req.user["_id"];
+        try {
+            const postToDeleteCommentFrom = await Post.findById(req.params.postId);
+            if (!postToDeleteCommentFrom) {
+                return res.json({
+                    message: "That post does not exist",
+                });
+            }
+            else if (postToDeleteCommentFrom.author.toString() !== userId.toString()) {
+                // signed in user does not match author on post
+                return res.json({
+                    message: "Only the author of the post can remove comments from it",
+                });
+            }
+            else {
+                // signed in user matches author of post and post exists
+                // update post
+                postToDeleteCommentFrom.comments.splice(postToDeleteCommentFrom.comments.indexOf(req.params.commentId), 1);
+                const updatePost = await Post.findByIdAndUpdate(req.params.postId, postToDeleteCommentFrom, { new: true });
+                // delete comment
+                if (!updatePost) {
+                    return res.json({
+                        message: "We are aborting this request, we were unable to remove that comment",
+                    });
+                }
+                else {
+                    const deleteComment = await Comment.findByIdAndRemove(req.params.commentId.toString());
+                    if (!deleteComment) {
+                        return res.json({
+                            message: "There was an issue deleting the comment, it was removed from the post though",
+                        });
+                    }
+                    else {
+                        return res.json({
+                            message: "Post was updated, comment was removed",
+                            post: updatePost,
+                        });
+                    }
+                    ;
+                }
+                ;
+            }
+            ;
+        }
+        catch (error) {
+            return res.status(404).json({
+                message: "We were unable to perform this action",
+                error: error,
             });
         }
         ;

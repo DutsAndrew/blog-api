@@ -76,19 +76,18 @@ exports.get_user_posts = async (req: Request, res: Response, next: NextFunction)
   try {
     const user = await User.findById(userId.toString())
       .populate("posts");
+      
     if (!user) {
       return res.json({
         message: "There are no posts connected with your account",
       });
     } else {
       const posts = user.posts;
-
       // unescape user posts for returning to client/cms
       posts.forEach((post) => {
         post.title = he.decode(post.title);
         post.body = he.decode(post.body);
       });
-
       if (posts.length === 0) {
         return res.json({
           message: "You haven't created any posts yet, time to go make some!",

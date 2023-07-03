@@ -46,7 +46,6 @@ router.post('/post/create', passportCustomAuth, postController.create_post);
 router.put('/post/update/:id', passportCustomAuth, postController.put_post);
 router.delete('/post/delete/:id', passportCustomAuth, postController.delete_post);
 router.get('/user/comments', passportCustomAuth, commentController.get_user_comments);
-router.put('/post/:id/comment/:commentId', passportCustomAuth, commentController.put_comment);
-router.delete('/post/:id/comment/:commentId', passportCustomAuth, commentController.delete_comment);
+router.delete('/post/:postId/comment/remove/:commentId', passportCustomAuth, commentController.delete_comment);
 module.exports = router;
 //# sourceMappingURL=api.js.map

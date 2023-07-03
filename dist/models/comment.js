@@ -30,6 +30,11 @@ const CommentSchema = new Schema({
         type: [String],
         required: true,
     },
+    postRef: {
+        type: Schema.Types.ObjectId,
+        ref: 'Post',
+        required: false,
+    }
 });
 module.exports = mongoose_1.default.model("Comment", CommentSchema);
 //# sourceMappingURL=comment.js.map
